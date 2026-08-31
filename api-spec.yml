@@ -291,21 +291,25 @@ components:
       name: "X-API-Key"
       description: "Authetication for User API"
   schemas:
-    UserCreateOrUpdate:
-      type: "object"
-      properties:
-        username:
-          type: "string"
-        password:
-          type: "string"
-        name:
-          type: "string"
     User:
       type: "object"
       properties:
         user_id:
           type: "string"
         username:
+          type: "string"
+        name:
+          type: "string"
+        devices:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Device"
+    UserCreateOrUpdate:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
           type: "string"
         name:
           type: "string"
@@ -324,8 +328,8 @@ components:
           type: "string"
         device_information_manufacturer_name:
           type: "string"
-        user:
-          $ref: "#/components/schemas/User"
+        user_id:
+          type: "string"
     DeviceCreateOrUpdate:
       type: "object"
       properties:
@@ -338,4 +342,6 @@ components:
         device_information_software_revision:
           type: "string"
         device_information_manufacturer_name:
+          type: "string"
+        user_id:
           type: "string"

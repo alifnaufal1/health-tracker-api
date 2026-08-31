@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"health-tracker-api/config"
+	"health-tracker-api/internal/config"
 	"strconv"
 
 	// "app/model"
