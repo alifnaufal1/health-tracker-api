@@ -9,7 +9,7 @@ paths:
   /users:
     get:
       security:
-        - UserAuth: []
+        - Auth: []
       tags:
         - "User API"
       description: "List all users"
@@ -32,7 +32,7 @@ paths:
                       $ref: "#/components/schemas/User"
     post:
       security:
-        - UserAuth: []
+        - Auth: []
       tags:
         - "User API"
       description: "Create new User"
@@ -41,7 +41,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateOrUpdateUser"
+              $ref: "#/components/schemas/UserCreateOrUpdate"
       responses:
         "200":
           description: "Success create User"
@@ -59,7 +59,7 @@ paths:
   /users/{UserId}:
     get:
       security:
-        - UserAuth: []
+        - Auth: []
       tags:
         - "User API"
       description: "Get User by id"
@@ -87,7 +87,7 @@ paths:
                     $ref: "#/components/schemas/User"
     put:
       security:
-        - UserAuth: []
+        - Auth: []
       tags:
         - "User API"
       description: "Update User by id"
@@ -103,7 +103,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateOrUpdateUser"
+              $ref: "#/components/schemas/UserCreateOrUpdate"
       responses:
         "200":
           description: "Success create User"
@@ -120,7 +120,7 @@ paths:
                     $ref: "#/components/schemas/User"
     delete:
       security:
-        - UserAuth: []
+        - Auth: []
       tags:
         - "User API"
       description: "Delete User by id"
@@ -144,15 +144,154 @@ paths:
                     type: "number"
                   status:
                     type: "string"
+  /devices:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "List all devices"
+      summary: "List all devices"
+      responses:
+        "200":
+          description: "Success get all devices"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Device"
+    post:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "Create new device"
+      summary: "Create new device"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceCreateOrUpdate"
+      responses:
+        "200":
+          description: "Success create device"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    $ref: "#/components/schemas/Device"
+  /devices/{DeviceId}:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "Get device by id"
+      summary: "Get device by id"
+      parameters:
+        - name: "DeviceId"
+          in: "path"
+          description: "Device Id"
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Success get device"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    $ref: "#/components/schemas/Device"
+    put:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "Update device by id"
+      summary: "Update device by id"
+      parameters:
+        - name: "DeviceId"
+          in: "path"
+          description: "Device Id"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceCreateOrUpdate"
+      responses:
+        "200":
+          description: "Success update device"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    $ref: "#/components/schemas/Device"
+    delete:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "Delete device by id"
+      summary: "Delete device by id"
+      parameters:
+        - name: "DeviceId"
+          in: "path"
+          description: "Device Id"
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Success delete device"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+
 components:
   securitySchemes:
-    UserAuth:
+    Auth:
       type: apiKey
       in: header
       name: "X-API-Key"
       description: "Authetication for User API"
   schemas:
-    CreateOrUpdateUser:
+    UserCreateOrUpdate:
       type: "object"
       properties:
         username:
@@ -164,9 +303,39 @@ components:
     User:
       type: "object"
       properties:
+        user_id:
+          type: "string"
         username:
           type: "string"
-        password:
-          type: "string"
         name:
+          type: "string"
+    Device:
+      type: "object"
+      properties:
+        device_id:
+          type: "string"
+        generic_access_device_name:
+          type: "string"
+        device_information_serial_number:
+          type: "string"
+        device_information_firmware_revision:
+          type: "string"
+        device_information_software_revision:
+          type: "string"
+        device_information_manufacturer_name:
+          type: "string"
+        user:
+          $ref: "#/components/schemas/User"
+    DeviceCreateOrUpdate:
+      type: "object"
+      properties:
+        generic_access_device_name:
+          type: "string"
+        device_information_serial_number:
+          type: "string"
+        device_information_firmware_revision:
+          type: "string"
+        device_information_software_revision:
+          type: "string"
+        device_information_manufacturer_name:
           type: "string"
