@@ -1,0 +1,172 @@
+openapi: "3.0.3"
+info:
+  title: Health Tracker RESTful API
+  description: "API Spec for Health Tracker RESTful API"
+  version: "1.0"
+servers:
+  - url: https://localhost:3108/api
+paths:
+  /users:
+    get:
+      security:
+        - UserAuth: []
+      tags:
+        - "User API"
+      description: "List all users"
+      summary: "List all users"
+      responses:
+        "200":
+          description: "Success get all users"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/User"
+    post:
+      security:
+        - UserAuth: []
+      tags:
+        - "User API"
+      description: "Create new User"
+      summary: "Create new User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrUpdateUser"
+      responses:
+        "200":
+          description: "Success create User"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    $ref: "#/components/schemas/User"
+  /users/{UserId}:
+    get:
+      security:
+        - UserAuth: []
+      tags:
+        - "User API"
+      description: "Get User by id"
+      summary: "Get User by id"
+      parameters:
+        - name: "UserId"
+          in: "path"
+          description: "User Id"
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Success get user"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    $ref: "#/components/schemas/User"
+    put:
+      security:
+        - UserAuth: []
+      tags:
+        - "User API"
+      description: "Update User by id"
+      summary: "Update User by id"
+      parameters:
+        - name: "UserId"
+          in: "path"
+          description: "User Id"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrUpdateUser"
+      responses:
+        "200":
+          description: "Success create User"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+                  data:
+                    $ref: "#/components/schemas/User"
+    delete:
+      security:
+        - UserAuth: []
+      tags:
+        - "User API"
+      description: "Delete User by id"
+      summary: "Delete User by id"
+      parameters:
+        - name: "UserId"
+          in: "path"
+          description: "User Id"
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "Success delete User"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: "string"
+components:
+  securitySchemes:
+    UserAuth:
+      type: apiKey
+      in: header
+      name: "X-API-Key"
+      description: "Authetication for User API"
+  schemas:
+    CreateOrUpdateUser:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+        name:
+          type: "string"
+    User:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+        name:
+          type: "string"

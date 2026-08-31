@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: db_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: health-tracker-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_volume:/var/lib/postgresql/data
+
+  golang-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend_api
+    restart: always
+    ports:
+      - "3108:3108"
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_NAME: health-tracker-db
+    depends_on:
+      - postgres-db
+
+volumes:
+  pgdata_volume:
