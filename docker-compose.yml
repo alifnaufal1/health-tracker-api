@@ -14,22 +14,22 @@ services:
     volumes:
       - pgdata_volume:/var/lib/postgresql/data
 
-  golang-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: backend_api
-    restart: always
-    ports:
-      - "3108:3108"
-    environment:
-      DB_HOST: postgres-db
-      DB_PORT: 5432
-      DB_USER: admin
-      DB_PASSWORD: password
-      DB_NAME: health-tracker-db
-    depends_on:
-      - postgres-db
+  # golang-api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: health-tracker-api
+  #   restart: always
+  #   ports:
+  #     - "3108:3108"
+  #   environment:
+  #     DB_HOST: postgres-db
+  #     DB_PORT: 5432
+  #     DB_USER: admin
+  #     DB_PASSWORD: password
+  #     DB_NAME: health-tracker-db
+  #   depends_on:
+  #     - postgres-db
 
 volumes:
   pgdata_volume:

@@ -10,13 +10,17 @@ import (
 
 type UserRepository interface {
 	Save(ctx fiber.Ctx, tx *gorm.DB, user domain.User) domain.User
-	Update(ctx fiber.Ctx, user domain.User) domain.User
-	Delete(ctx fiber.Ctx, userId string)
-	FindById(ctx fiber.Ctx, userId string) domain.User
-	FindAll(ctx fiber.Ctx) []domain.User
+	// Update(ctx fiber.Ctx, user domain.User) domain.User
+	// Delete(ctx fiber.Ctx, userId string)
+	// FindById(ctx fiber.Ctx, userId string) domain.User
+	// FindAll(ctx fiber.Ctx) []domain.User
 }
 
 type UserRepositoryImpl struct {}
+
+func NewUserRepository() UserRepository {
+	return &UserRepositoryImpl{}
+}
 
 func (repo *UserRepositoryImpl) Save(ctx fiber.Ctx, tx *gorm.DB, user domain.User) domain.User {
 	result := gorm.WithResult()

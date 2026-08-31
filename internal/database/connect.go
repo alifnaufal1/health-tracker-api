@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"health-tracker-api/internal/config"
+	"health-tracker-api/internal/model/domain"
 	"strconv"
 
 	// "app/model"
@@ -21,7 +22,8 @@ func ConnectDB() {
 	}
 
 	dsn := fmt.Sprintf(
-		"host=db port=%d user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		config.Config("DB_HOST"),
 		port,
 		config.Config("DB_USER"),
 		config.Config("DB_PASSWORD"),
@@ -33,6 +35,6 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Connection Opened to Database")
-	// DB.AutoMigrate(&model.Product{}, &model.User{})
+	DB.AutoMigrate(&domain.User{}, &domain.Device{})
 	fmt.Println("Database Migrated")
 }
