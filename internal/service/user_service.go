@@ -41,7 +41,6 @@ func (service *UserServiceImpl) Create(ctx fiber.Ctx, request web.UserCreateRequ
 		Username: request.Username,
 		Password: hash,
 		Name: request.Name,
-		Devices: request.Devices,
 	}
 
 	user = service.UserRepository.Save(ctx, tx, user)

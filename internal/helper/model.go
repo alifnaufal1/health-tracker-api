@@ -7,9 +7,8 @@ import (
 
 func ToUserResponse(user domain.User) web.UserResponse {
 	return web.UserResponse{
-		UserId:   user.UserId,
+		UserID:   user.Base.ID.String(),
 		Username:   user.Username,
 		Name: user.Name,
-		Devices:   user.Devices,
 	}
 }

@@ -9,11 +9,11 @@ import (
 )
 
 type UserRepository interface {
-	Save(ctx fiber.Ctx, tx *gorm.DB, user domain.User) domain.User
-	// Update(ctx fiber.Ctx, user domain.User) domain.User
-	// Delete(ctx fiber.Ctx, userId string)
-	// FindById(ctx fiber.Ctx, userId string) domain.User
-	// FindAll(ctx fiber.Ctx) []domain.User
+	Save(c fiber.Ctx, tx *gorm.DB, user domain.User) domain.User
+	// Update(c fiber.Ctx, tx *gorm.DB, user domain.User) domain.User
+	// Delete(c fiber.Ctx, tx *gorm.DB, userId string)
+	// FindById(c fiber.Ctx, tx *gorm.DB, userId string) domain.User
+	// FindAll(c fiber.Ctx, tx *gorm.DB) []domain.User
 }
 
 type UserRepositoryImpl struct {}
@@ -22,9 +22,16 @@ func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
 
-func (repo *UserRepositoryImpl) Save(ctx fiber.Ctx, tx *gorm.DB, user domain.User) domain.User {
+func (repo *UserRepositoryImpl) Save(c fiber.Ctx, tx *gorm.DB, user domain.User) domain.User {
 	result := gorm.WithResult()
-	err := gorm.G[domain.User](tx, result).Create(ctx, &user)
+	err := gorm.G[domain.User](tx, result).Create(c, &user)
 	helper.PanicIfError(err)
 	return user
 }
+
+// func (repo *UserRepositoryImpl) Update(c fiber.Ctx, tx *gorm.DB, user domain.User) domain.User {
+// 	result := gorm.WithResult()
+// 	err := gorm.G[domain.User](tx, result).Update(c, &user)
+// 	helper.PanicIfError(err)
+// 	return user
+// }
