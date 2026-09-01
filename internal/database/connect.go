@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// ConnectDB connect to db
 func ConnectDB() {
 	var err error
 	p := config.Config("DB_PORT")

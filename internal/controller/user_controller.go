@@ -24,11 +24,11 @@ func NewUserController(userService service.UserService) UserController {
 }
 
 func (controller *UserControllerImpl) Create(c fiber.Ctx) {
-	userCreateRequest := userWeb.UserCreateRequest{}
+	userCreateRequest := new(userWeb.UserCreateRequest)
 	err := c.Bind().Body(userCreateRequest)
 	helper.PanicIfError(err)
 
-	createdUser := controller.UserService.Create(c, userCreateRequest)
+	createdUser := controller.UserService.Create(c, *userCreateRequest)
 	webResponse := web.WebResponse{
 		Code: 200,
 		Status: "OK",
