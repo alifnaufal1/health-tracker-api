@@ -2,38 +2,40 @@ package controller
 
 import (
 	"health-tracker-api/internal/helper"
-	"health-tracker-api/internal/model/web"
 	userWeb "health-tracker-api/internal/model/web/user"
 	"health-tracker-api/internal/service"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/sirupsen/logrus"
 )
 
 type UserController interface {
-	Create(ctx fiber.Ctx) 
+	Create(ctx fiber.Ctx) error
 }
 
 type UserControllerImpl struct {
 	UserService service.UserService
+	log *logrus.Logger
 }
 
-func NewUserController(userService service.UserService) UserController {
+func NewUserController(userService service.UserService, log *logrus.Logger) UserController {
 	return &UserControllerImpl{
 		UserService: userService,
+		log: log,
 	}
 }
 
-func (controller *UserControllerImpl) Create(c fiber.Ctx) {
+func (c *UserControllerImpl) Create(ctx fiber.Ctx) error {
 	userCreateRequest := new(userWeb.UserCreateRequest)
-	err := c.Bind().Body(userCreateRequest)
-	helper.PanicIfError(err)
-
-	createdUser := controller.UserService.Create(c, *userCreateRequest)
-	webResponse := web.WebResponse{
-		Code: 200,
-		Status: "OK",
-		Data: createdUser,
+	err := ctx.Bind().Body(userCreateRequest)
+	if err != nil {
+		return err
+	}
+	
+	createdUser, err := c.UserService.Create(ctx, *userCreateRequest)
+	if err != nil {
+		return err
 	}
 
-	helper.WriteResponseBody(c, webResponse)
+	return helper.ToWebResponse(ctx, createdUser)
 }
