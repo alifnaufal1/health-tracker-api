@@ -98,23 +98,28 @@ func (s *UserServiceImpl) Update(c fiber.Ctx, request web.UserUpdateRequest) (*w
 		return nil, errors.New(err.Error())
 	}
 
-	hash, err := helper.HashPassword(request.Password)
-	if err != nil {
-		log.Error("Failed to hash password")
-		return nil, errors.New(err.Error())
+	if request.Username != "" {
+		user.Username = request.Username
 	}
-
-	user.Username = request.Username
-	user.Password = hash
-	user.Name = request.Name
+	if request.Password != "" {
+		hash, err := helper.HashPassword(request.Password)
+		if err != nil {
+			log.Error("Failed to hash password")
+			return nil, errors.New(err.Error())
+		}
+		user.Password = hash
+	}
+	if request.Name != "" {
+		user.Name = request.Name
+	}
 
 	user, err = s.UserRepository.Update(c, tx, user)
 	if err != nil {
-		log.Warn("Create user process failed at repository layer")
+		log.Warn("Update user process failed at repository layer")
 		return nil, errors.New(err.Error())
 	}
 
-	log.WithField("user_id", user.ID).Info("User created successfully")
+	log.WithField("user_id", user.ID).Info("User updated successfully")
 
 	return helper.ToUserResponse(user), nil
 }
