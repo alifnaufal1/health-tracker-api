@@ -45,15 +45,15 @@ func (c *UserControllerImpl) Create(ctx fiber.Ctx) error {
 }
 
 func (c *UserControllerImpl) Update(ctx fiber.Ctx) error {
-	userUppdateRequest := new(userWeb.UserUpdateRequest)
-	err := ctx.Bind().Body(userUppdateRequest)
+	userUpdateRequest := new(userWeb.UserUpdateRequest)
+	err := ctx.Bind().Body(userUpdateRequest)
 	if err != nil {
 		return err
 	}
 	
-	userUppdateRequest.UserID = ctx.Params("id")
+	userUpdateRequest.UserID = ctx.Params("id")
 
-	updatedUser, err := c.UserService.Update(ctx, *userUppdateRequest)
+	updatedUser, err := c.UserService.Update(ctx, *userUpdateRequest)
 	if err != nil {
 		return err
 	}

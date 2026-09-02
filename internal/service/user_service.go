@@ -104,11 +104,9 @@ func (s *UserServiceImpl) Update(c fiber.Ctx, request web.UserUpdateRequest) (*w
 		return nil, errors.New(err.Error())
 	}
 
-	user = &domain.User{
-		Username: request.Username,
-		Password: hash,
-		Name: request.Name,
-	}
+	user.Username = request.Username
+	user.Password = hash
+	user.Name = request.Name
 
 	user, err = s.UserRepository.Update(c, tx, user)
 	if err != nil {
