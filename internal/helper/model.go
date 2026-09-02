@@ -12,3 +12,11 @@ func ToUserResponse(user *domain.User) *web.UserResponse {
 		Name: user.Name,
 	}
 }
+
+func ToUserResponses(users *[]domain.User) *[]web.UserResponse {
+	var userResponses []web.UserResponse
+	for i := range *users {
+		userResponses = append(userResponses, *ToUserResponse(&(*users)[i]))
+	}
+	return &userResponses
+}

@@ -84,7 +84,7 @@ func (r *UserRepositoryImpl) FindById(ctx fiber.Ctx, tx *gorm.DB, userID string)
 	users, err := gorm.G[domain.User](tx).Select("id", "username", "name").Where("id = ?", userID).Find(ctx)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database find by id failed")
-		return &users[0], err
+		return nil, err
 	}
 	
 	log.WithField("user_id", userID).Debug("User found by id successfully")
