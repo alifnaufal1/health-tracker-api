@@ -11,6 +11,10 @@ import (
 
 type UserController interface {
 	Create(ctx fiber.Ctx) error
+	Update(ctx fiber.Ctx) error
+	Delete(ctx fiber.Ctx) error
+	FindByID(ctx fiber.Ctx) error
+	FindAll(ctx fiber.Ctx) error
 }
 
 type UserControllerImpl struct {
@@ -38,4 +42,48 @@ func (c *UserControllerImpl) Create(ctx fiber.Ctx) error {
 	}
 
 	return helper.ToWebResponse(ctx, createdUser)
+}
+
+func (c *UserControllerImpl) Update(ctx fiber.Ctx) error {
+	userUppdateRequest := new(userWeb.UserUpdateRequest)
+	err := ctx.Bind().Body(userUppdateRequest)
+	if err != nil {
+		return err
+	}
+	
+	userUppdateRequest.UserID = ctx.Params("id")
+
+	updatedUser, err := c.UserService.Update(ctx, *userUppdateRequest)
+	if err != nil {
+		return err
+	}
+
+	return helper.ToWebResponse(ctx, updatedUser)
+}
+
+func (c *UserControllerImpl) Delete(ctx fiber.Ctx) error {
+	err := c.UserService.Delete(ctx, ctx.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	return helper.ToWebResponse(ctx, nil)
+}
+
+func (c *UserControllerImpl) FindByID(ctx fiber.Ctx) error {	
+	user, err := c.UserService.FindByID(ctx, ctx.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	return helper.ToWebResponse(ctx, user)
+}
+
+func (c *UserControllerImpl) FindAll(ctx fiber.Ctx) error {	
+	users, err := c.UserService.FindAll(ctx)
+	if err != nil {
+		return err
+	}
+
+	return helper.ToWebResponse(ctx, users)
 }

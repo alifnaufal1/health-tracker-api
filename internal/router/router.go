@@ -8,7 +8,7 @@ import (
 )
 
 func SetupRoutes(app *fiber.App, userController controller.UserController) {
-	// // Middleware
+	// Middleware
 	api := app.Group("/api", logger.New())
 	// api.Get("/", handler.Hello)
 
@@ -18,15 +18,11 @@ func SetupRoutes(app *fiber.App, userController controller.UserController) {
 
 	// User
 	user := api.Group("/user")
-	// user.Get("/:id", controller.GetUser)
 	user.Post("/", userController.Create)
+	user.Put("/:id", userController.Update)
 	// user.Patch("/:id", middleware.Protected(), controller.UpdateUser)
+	user.Delete("/:id", userController.Delete)
 	// user.Delete("/:id", middleware.Protected(), controller.DeleteUser)
-
-	// // Product
-	// product := api.Group("/product")
-	// product.Get("/", handler.GetAllProducts)
-	// product.Get("/:id", handler.GetProduct)
-	// product.Post("/", middleware.Protected(), handler.CreateProduct)
-	// product.Delete("/:id", middleware.Protected(), handler.DeleteProduct)
+	user.Get("/:id", userController.FindByID)
+	user.Get("/", userController.FindAll)
 }
