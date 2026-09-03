@@ -39,9 +39,9 @@ func NewDeviceService(deviceRepository repository.DeviceRepository, validate *va
 }
 
 func (s *DeviceServiceImpl) Create(c fiber.Ctx, request web.DeviceCreateRequest) (*web.DeviceResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log).WithField("device_name", request.DeviceName)
+	log := helper.LoggerWithRequestID(c, s.log)
 
-	log.Info("Received create device request")
+	log.WithField("request", request).Info("Received create device request")
 	
 	err := s.Validate.Struct(request)
 	if err != nil {
@@ -51,20 +51,26 @@ func (s *DeviceServiceImpl) Create(c fiber.Ctx, request web.DeviceCreateRequest)
 	
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
-	
-	parsedUUID, err := uuid.Parse(request.UserID)
-	if err != nil {
-		log.WithField("error", err.Error()).Warn("Fail to parse user_id")
-		return nil, errors.New("user_id is not valid")
-	}
 
+	var parsedUserID *uuid.UUID = nil
+	if request.UserID != "" {
+		parsedUUID, err := uuid.Parse(request.UserID)
+		
+		if err != nil {
+			log.WithField("error", err.Error()).Warn("Fail to parse user_id")
+			return nil, errors.New("user_id is not valid")
+		}
+		parsedUserID = &parsedUUID
+	}
+	
 	device := &domain.Device{
 		Base: domain.Base{ID: uuid.New()},
 		DeviceName: request.DeviceName,
+		SerialNumber: request.SerialNumber,
 		FirmwareRevision: request.FirmwareRevision,
 		SoftwareRevision: request.SoftwareRevision,
 		ManufacturerName: request.ManufacturerName,
-		UserID: (*uuid.UUID)(&parsedUUID),
+		UserID: parsedUserID,
 	}
 
 	device, err = s.deviceRepository.Save(c, tx, device)

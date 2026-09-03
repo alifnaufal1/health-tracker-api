@@ -6,5 +6,5 @@ type DeviceCreateRequest struct {
 	FirmwareRevision string `validate:"required,min=1,max=255" json:"firmware_revision"`
 	SoftwareRevision string `validate:"required,min=1,max=255" json:"software_revision"`
 	ManufacturerName string `validate:"required,min=1,max=255" json:"manufacturer_name"`
-	UserID           string `validate:"min=1,max=255" json:"user_id"`
+	UserID           string `json:"user_id"`
 }

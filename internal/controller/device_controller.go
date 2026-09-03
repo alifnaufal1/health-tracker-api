@@ -41,7 +41,7 @@ func (c *DeviceControllerImpl) Create(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, createdDevice)
+	return helper.ToWebResponse(ctx, createdDevice, "success create new device")
 }
 
 func (c *DeviceControllerImpl) Update(ctx fiber.Ctx) error {
@@ -56,7 +56,7 @@ func (c *DeviceControllerImpl) Update(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, updatedUser)
+	return helper.ToWebResponse(ctx, updatedUser, "success update device")
 }
 
 func (c *DeviceControllerImpl) Delete(ctx fiber.Ctx) error {
@@ -65,7 +65,7 @@ func (c *DeviceControllerImpl) Delete(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, nil)
+	return helper.ToWebResponse(ctx, nil, "success delete device")
 }
 
 func (c *DeviceControllerImpl) FindByID(ctx fiber.Ctx) error {	
@@ -74,7 +74,7 @@ func (c *DeviceControllerImpl) FindByID(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, user)
+	return helper.ToWebResponse(ctx, user, "success find device")
 }
 
 func (c *DeviceControllerImpl) FindAll(ctx fiber.Ctx) error {	
@@ -83,5 +83,5 @@ func (c *DeviceControllerImpl) FindAll(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, users)
+	return helper.ToWebResponse(ctx, users, "success find all devices")
 }

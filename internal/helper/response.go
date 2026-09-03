@@ -12,10 +12,11 @@ func WriteResponseBody(c fiber.Ctx, response any) {
 	PanicIfError(err)
 }
 
-func ToWebResponse(c fiber.Ctx, data any) error {
+func ToWebResponse(c fiber.Ctx, data any, message string) error {
 	return c.Status(200).JSON(web.WebResponse{
 		Code: 200,
 		Status: true,
 		Data: data,
+		Message: message,
 	})
 }

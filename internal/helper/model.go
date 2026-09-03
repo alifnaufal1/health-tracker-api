@@ -15,6 +15,10 @@ func ToUserResponse(user *domain.User) *webUser.UserResponse {
 }
 
 func ToDeviceResponse(device *domain.Device) *webDevice.DeviceResponse {
+	var userID string
+	if device.UserID != nil {
+		userID = device.UserID.String()
+	}
 	return &webDevice.DeviceResponse{
 		DeviceID:   device.Base.ID.String(),
 		DeviceName: device.DeviceName,
@@ -22,7 +26,7 @@ func ToDeviceResponse(device *domain.Device) *webDevice.DeviceResponse {
 		FirmwareRevision: device.FirmwareRevision,
 		SoftwareRevision: device.SoftwareRevision,
 		ManufacturerName: device.ManufacturerName,
-		UserID: device.UserID.String(),
+		UserID: userID,
 	}
 }
 

@@ -26,7 +26,7 @@ func NewDeviceRepository(log *logrus.Logger) DeviceRepository {
 }
 
 func (r *DeviceRepositoryImpl) Save(c fiber.Ctx, tx *gorm.DB, device *domain.Device) (*domain.Device, error) {
-	log := helper.LoggerWithRequestID(c, r.log).WithField("device_name", device.DeviceName)
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device", device)
 
 	log.Debug("Inserting new device into database")
 	
@@ -82,7 +82,7 @@ func (r *DeviceRepositoryImpl) FindById(c fiber.Ctx, tx *gorm.DB, deviceID strin
 	log.Debug("Finding device by id from database")
 	
 	result := gorm.WithResult()
-	devices, err := gorm.G[domain.Device](tx, result).Select("id", "device_name", "serial_number", "firmware", "software_revision", "manufacturer_name").Where("id = ?", deviceID).Find(c)
+	device, err := gorm.G[domain.Device](tx, result).Where("id = ?", deviceID).First(c)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database find by id failed")
 		return nil, err
@@ -90,7 +90,7 @@ func (r *DeviceRepositoryImpl) FindById(c fiber.Ctx, tx *gorm.DB, deviceID strin
 	
 	log.WithField("device_id", deviceID).Debug("Device found by id successfully")
 	
-	return &devices[0], nil
+	return &device, nil
 }
 
 func (r *DeviceRepositoryImpl) FindAll(c fiber.Ctx, tx *gorm.DB) (*[]domain.Device, error) {
@@ -99,7 +99,7 @@ func (r *DeviceRepositoryImpl) FindAll(c fiber.Ctx, tx *gorm.DB) (*[]domain.Devi
 	log.Debug("Finding all devices from database")
 	
 	result := gorm.WithResult()
-	devices, err := gorm.G[domain.Device](tx, result).Select("id", "device_name", "serial_number", "firmware", "software_revision", "manufacturer_name").Find(c)
+	devices, err := gorm.G[domain.Device](tx, result).Find(c)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database find all failed")
 		return nil, err

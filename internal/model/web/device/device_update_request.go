@@ -6,5 +6,5 @@ type DeviceUpdateRequest struct {
 	FirmwareRevision string `validate:"required_without_all=SerialNumber SoftwareRevision ManufacturerName DeviceName,omitempty,min=1,max=255" json:"firmware_revision"`
 	SoftwareRevision string `validate:"required_without_all=SerialNumber FirmwareRevision ManufacturerName DeviceName,omitempty,min=1,max=255" json:"software_revision"`
 	ManufacturerName string `validate:"required_without_all=SerialNumber FirmwareRevision SoftwareRevision DeviceName,omitempty,min=1,max=255" json:"manufacturer_name"`
-	UserID           string `validate:"min=1,max=255" json:"user_id"`
+	UserID           string `json:"user_id"`
 }

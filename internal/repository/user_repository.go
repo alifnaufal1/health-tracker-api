@@ -81,7 +81,7 @@ func (r *UserRepositoryImpl) FindById(ctx fiber.Ctx, tx *gorm.DB, userID string)
 	
 	log.Debug("Finding user by id from database")
 	
-	users, err := gorm.G[domain.User](tx).Select("id", "username", "name").Where("id = ?", userID).Find(ctx)
+	user, err := gorm.G[domain.User](tx).Where("id = ?", userID).First(ctx)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database find by id failed")
 		return nil, err
@@ -89,7 +89,7 @@ func (r *UserRepositoryImpl) FindById(ctx fiber.Ctx, tx *gorm.DB, userID string)
 	
 	log.WithField("user_id", userID).Debug("User found by id successfully")
 	
-	return &users[0], nil
+	return &user, nil
 }
 
 func (r *UserRepositoryImpl) FindAll(ctx fiber.Ctx, tx *gorm.DB) (*[]domain.User, error) {
@@ -97,7 +97,7 @@ func (r *UserRepositoryImpl) FindAll(ctx fiber.Ctx, tx *gorm.DB) (*[]domain.User
 
 	log.Debug("Finding all user from database")
 	
-	users, err := gorm.G[domain.User](tx).Select("id", "username", "name").Find(ctx)
+	users, err := gorm.G[domain.User](tx).Find(ctx)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database find all failed")
 		return &users, err

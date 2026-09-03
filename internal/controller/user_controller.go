@@ -41,7 +41,7 @@ func (c *UserControllerImpl) Create(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, createdUser)
+	return helper.ToWebResponse(ctx, createdUser, "success create new user")
 }
 
 func (c *UserControllerImpl) Update(ctx fiber.Ctx) error {
@@ -58,7 +58,7 @@ func (c *UserControllerImpl) Update(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, updatedUser)
+	return helper.ToWebResponse(ctx, updatedUser, "success update user")
 }
 
 func (c *UserControllerImpl) Delete(ctx fiber.Ctx) error {
@@ -67,7 +67,7 @@ func (c *UserControllerImpl) Delete(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, nil)
+	return helper.ToWebResponse(ctx, nil, "success delete user")
 }
 
 func (c *UserControllerImpl) FindByID(ctx fiber.Ctx) error {	
@@ -76,7 +76,7 @@ func (c *UserControllerImpl) FindByID(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, user)
+	return helper.ToWebResponse(ctx, user, "success find user")
 }
 
 func (c *UserControllerImpl) FindAll(ctx fiber.Ctx) error {	
@@ -85,5 +85,5 @@ func (c *UserControllerImpl) FindAll(ctx fiber.Ctx) error {
 		return err
 	}
 
-	return helper.ToWebResponse(ctx, users)
+	return helper.ToWebResponse(ctx, users, "success find all users")
 }
