@@ -2,21 +2,34 @@ package helper
 
 import (
 	"health-tracker-api/internal/model/domain"
-	web "health-tracker-api/internal/model/web/user"
+	webDevice "health-tracker-api/internal/model/web/device"
+	webUser "health-tracker-api/internal/model/web/user"
 )
 
-func ToUserResponse(user *domain.User) *web.UserResponse {
-	return &web.UserResponse{
+func ToUserResponse(user *domain.User) *webUser.UserResponse {
+	return &webUser.UserResponse{
 		UserID:   user.Base.ID.String(),
 		Username:   user.Username,
 		Name: user.Name,
 	}
 }
 
-func ToUserResponses(users *[]domain.User) *[]web.UserResponse {
-	var userResponses []web.UserResponse
-	for i := range *users {
-		userResponses = append(userResponses, *ToUserResponse(&(*users)[i]))
+func ToDeviceResponse(device *domain.Device) *webDevice.DeviceResponse {
+	return &webDevice.DeviceResponse{
+		DeviceID:   device.Base.ID.String(),
+		DeviceName: device.DeviceName,
+		SerialNumber: device.SerialNumber,
+		FirmwareRevision: device.FirmwareRevision,
+		SoftwareRevision: device.SoftwareRevision,
+		ManufacturerName: device.ManufacturerName,
+		UserID: device.UserID.String(),
 	}
-	return &userResponses
+}
+
+func ToResponses[A any, B any](data *[]A, toResponse func(*A) *B) *[]B {
+	var dataResponses []B
+	for i := range *data {
+		dataResponses = append(dataResponses, *toResponse(&(*data)[i]))
+	}
+	return &dataResponses
 }

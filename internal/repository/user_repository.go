@@ -51,7 +51,7 @@ func (r *UserRepositoryImpl) Update(ctx fiber.Ctx, tx *gorm.DB, user *domain.Use
 	_, err := gorm.G[domain.User](tx, result).Where("id = ?", user.ID).Updates(ctx, *user)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database update failed")
-		return user, err
+		return nil, err
 	}
 
 	log.WithField("user_id", user.ID).Debug("User updated successfully")

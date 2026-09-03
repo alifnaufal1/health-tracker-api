@@ -1,11 +1,10 @@
 package web
 
-type DeviceCUpdateRequest struct {
-	DeviceId         string `validate:"required,min=1,max=255" json:"device_id"`
-	DeviceName       string `validate:"required,min=1,max=255" json:"device_name"`
-	SerialNumber     string `validate:"required,min=1,max=255" json:"serial_number"`
-	FirmwareRevision string `validate:"required,min=1,max=255" json:"firmware_revision"`
-	SoftwareRevision string `validate:"required,min=1,max=255" json:"software_revision"`
-	ManufacturerName string `validate:"required,min=1,max=255" json:"manufacturer_name"`
-	UserId           string `validate:"min=1,max=255" json:"user_id"`
+type DeviceUpdateRequest struct {
+	DeviceName       string `validate:"required_without_all=SerialNumber FirmwareRevision SoftwareRevision ManufacturerName,omitempty,min=1,max=255" json:"device_name"`
+	SerialNumber     string `validate:"required_without_all=FirmwareRevision SoftwareRevision ManufacturerName DeviceName,omitempty,min=1,max=255" json:"serial_number"`
+	FirmwareRevision string `validate:"required_without_all=SerialNumber SoftwareRevision ManufacturerName DeviceName,omitempty,min=1,max=255" json:"firmware_revision"`
+	SoftwareRevision string `validate:"required_without_all=SerialNumber FirmwareRevision ManufacturerName DeviceName,omitempty,min=1,max=255" json:"software_revision"`
+	ManufacturerName string `validate:"required_without_all=SerialNumber FirmwareRevision SoftwareRevision DeviceName,omitempty,min=1,max=255" json:"manufacturer_name"`
+	UserID           string `validate:"min=1,max=255" json:"user_id"`
 }

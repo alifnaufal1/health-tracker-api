@@ -9,6 +9,6 @@ type Device struct {
 	FirmwareRevision string `gorm:"not null;size:255;"`
 	SoftwareRevision string `gorm:"not null;size:255;"`
 	ManufacturerName string `gorm:"not null;size:255;"`
-	UserID           uuid.UUID
+	UserID           *uuid.UUID
 	User 			 User
 }

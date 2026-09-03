@@ -34,10 +34,15 @@ func main() {
 
 	database.ConnectDB()
 	validate := validator.New()
+
 	userRepository := repository.NewUserRepository(logger)
 	userService := service.NewUserService(userRepository, validate, logger)
 	userController := controller.NewUserController(userService, logger)
 
-	router.SetupRoutes(app, userController)
+	deviceRepository := repository.NewDeviceRepository(logger)
+	deviceService := service.NewDeviceService(deviceRepository, validate, logger)
+	deviceController := controller.NewDeviceController(deviceService, logger)
+
+	router.SetupRoutes(app, userController, deviceController)
 	log.Fatal(app.Listen(":3108", fiber.ListenConfig{EnablePrefork: true}))
 }

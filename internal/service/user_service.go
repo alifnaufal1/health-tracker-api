@@ -197,5 +197,5 @@ func (s *UserServiceImpl) FindAll(c fiber.Ctx) (*[]web.UserResponse, error) {
 
 	log.Info("Users found successfully")
 
-	return helper.ToUserResponses(users), nil
+	return helper.ToResponses(users, helper.ToUserResponse), nil
 }
