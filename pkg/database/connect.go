@@ -34,6 +34,6 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Connection Opened to Database")
-	DB.AutoMigrate(&domain.User{}, &domain.Device{})
+	DB.AutoMigrate(&domain.User{}, &domain.Device{}, &domain.WorkoutData{})
 	fmt.Println("Database Migrated")
 }
