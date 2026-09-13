@@ -20,12 +20,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     type: "array"
                     items:
@@ -48,12 +48,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     $ref: "#/components/schemas/User"
   /users/{UserId}:
@@ -77,12 +77,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     $ref: "#/components/schemas/User"
     put:
@@ -110,12 +110,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     $ref: "#/components/schemas/User"
     delete:
@@ -138,12 +138,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
   /devices:
     get:
       security:
@@ -158,12 +158,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     type: "array"
                     items:
@@ -186,12 +186,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     $ref: "#/components/schemas/Device"
   /devices/{DeviceId}:
@@ -215,12 +215,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     $ref: "#/components/schemas/Device"
     put:
@@ -248,12 +248,12 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
                   data:
                     $ref: "#/components/schemas/Device"
     delete:
@@ -269,19 +269,124 @@ paths:
           description: "Device Id"
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: "Success delete device"
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   code:
                     type: "number"
                   status:
-                    type: "string"
+                    type: string
+  /workout-data:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "Workout Data API"
+      description: "List all workout data"
+      summary: "List all workout data"
+      responses:
+        "200":
+          description: "Success get all workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/WorkoutData"
+    post:
+      security:
+        - Auth: []
+      tags:
+        - "Workout Data API"
+      description: "Create new workout data"
+      summary: "Create new workout data"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkoutDataCreateOrUpdate"
+      responses:
+        "200":
+          description: "Success create workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/WorkoutData"
+  /workout-data/{WorkoutDataId}:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "Workout Data API"
+      description: "Get workout data by id"
+      summary: "Get workout data by id"
+      parameters:
+        - name: "WorkoutDataId"
+          in: "path"
+          description: "Workout Data Id"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Success get workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/WorkoutData"
+    delete:
+      security:
+        - Auth: []
+      tags:
+        - "Workout Data API"
+      description: "Delete workout data by id"
+      summary: "Delete workout data by id"
+      parameters:
+        - name: "WorkoutDataId"
+          in: "path"
+          description: "Workout Data Id"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Success delete workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
 
 components:
   securitySchemes:
@@ -292,56 +397,105 @@ components:
       description: "Authetication for User API"
   schemas:
     User:
-      type: "object"
+      type: object
       properties:
         user_id:
-          type: "string"
+          type: string
         username:
-          type: "string"
+          type: string
         name:
-          type: "string"
+          type: string
         devices:
           type: "array"
           items:
             $ref: "#/components/schemas/Device"
     UserCreateOrUpdate:
-      type: "object"
+      type: object
       properties:
         username:
-          type: "string"
+          type: string
         password:
-          type: "string"
+          type: string
         name:
-          type: "string"
+          type: string
     Device:
-      type: "object"
+      type: object
       properties:
         device_id:
-          type: "string"
+          type: string
         generic_access_device_name:
-          type: "string"
+          type: string
         device_information_serial_number:
-          type: "string"
+          type: string
         device_information_firmware_revision:
-          type: "string"
+          type: string
         device_information_software_revision:
-          type: "string"
+          type: string
         device_information_manufacturer_name:
-          type: "string"
+          type: string
         user_id:
-          type: "string"
+          type: string
     DeviceCreateOrUpdate:
-      type: "object"
+      type: object
       properties:
         generic_access_device_name:
-          type: "string"
+          type: string
         device_information_serial_number:
-          type: "string"
+          type: string
         device_information_firmware_revision:
-          type: "string"
+          type: string
         device_information_software_revision:
-          type: "string"
+          type: string
         device_information_manufacturer_name:
-          type: "string"
+          type: string
         user_id:
-          type: "string"
+          type: string
+    WorkoutData:
+      type: object
+      properties:
+        workout_data_id:
+          type: string
+        workout_data_type:
+          type: string
+        total_steps:
+          type: number
+        total_distance:
+          type: number
+        total_calory:
+          type: number
+        heart_rate_average:
+          type: number
+        pace:
+          type: number
+        created_at:
+          type: string
+        device_id:
+          type: string
+    WorkoutBatchData:
+      type: object
+      properties:
+        total_steps:
+          type: number
+        total_distance:
+          type: number
+        total_calory:
+          type: number
+        heart_rate:
+          type: number
+        created_at:
+          type: string
+    WorkoutDataCreateOrUpdate:
+      type: object
+      properties:
+        workout_data_type:
+          type: string
+        device_id:
+          type: string
+        total_time:
+          type: string
+        pace:
+          type: number
+        workout_batch_data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkoutBatchData"
