@@ -26,7 +26,7 @@ func NewUserRepository(log *logrus.Logger) UserRepository {
 }
 
 func (r *UserRepositoryImpl) Save(ctx fiber.Ctx, tx *gorm.DB, user *domain.User) (*domain.User, error) {
-	log := helper.LoggerWithRequestID(ctx, r.log).WithField("username", user.Username)
+	log := helper.LoggerWithRequestID(ctx, r.log).WithField("user", user)
 
 	log.Debug("Inserting new user into database")
 	

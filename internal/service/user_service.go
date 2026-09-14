@@ -39,9 +39,8 @@ func NewUserService(userRepository repository.UserRepository, validate *validato
 }
 
 func (s *UserServiceImpl) Create(c fiber.Ctx, request web.UserCreateRequest) (*web.UserResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log).WithField("username", request.Username)
-
-	log.Info("Received create user request")
+	log := helper.LoggerWithRequestID(c, s.log)
+	log.WithField("request", request).Info("Received create user request")
 	
 	err := s.Validate.Struct(request)
 	if err != nil {
@@ -60,9 +59,9 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request web.UserCreateRequest) (*w
 
 	user := &domain.User{
 		Base: domain.Base{ID: uuid.New()},
-		Username: request.Username,
 		Password: hash,
 		Name: request.Name,
+		NickName: request.NickName,
 	}
 
 	user, err = s.UserRepository.Save(c, tx, user)
@@ -98,9 +97,6 @@ func (s *UserServiceImpl) Update(c fiber.Ctx, request web.UserUpdateRequest) (*w
 		return nil, errors.New(err.Error())
 	}
 
-	if request.Username != "" {
-		user.Username = request.Username
-	}
 	if request.Password != "" {
 		hash, err := helper.HashPassword(request.Password)
 		if err != nil {
@@ -111,6 +107,9 @@ func (s *UserServiceImpl) Update(c fiber.Ctx, request web.UserUpdateRequest) (*w
 	}
 	if request.Name != "" {
 		user.Name = request.Name
+	}
+	if request.NickName != "" {
+		user.NickName = request.NickName
 	}
 
 	user, err = s.UserRepository.Update(c, tx, user)

@@ -1,7 +1,7 @@
 package web
 
 type UserResponse struct {
-	UserID   string          `json:"user_id"`
-	Username string          `json:"username"`
-	Name     string          `json:"name"`
+	UserID   string `json:"user_id"`
+	Name     string `json:"name"`
+	NickName string `json:"nick_name"`
 }

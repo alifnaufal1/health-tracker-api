@@ -10,8 +10,8 @@ import (
 func ToUserResponse(user *domain.User) *webUser.UserResponse {
 	return &webUser.UserResponse{
 		UserID:   user.Base.ID.String(),
-		Username:   user.Username,
 		Name: user.Name,
+		NickName: user.NickName,
 	}
 }
 
