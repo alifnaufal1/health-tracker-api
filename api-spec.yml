@@ -442,15 +442,15 @@ components:
           type: number
         total_distance:
           type: number
-        total_calory:
+        total_calories:
           type: number
         heart_rate_average:
           type: number
         pace:
           type: number
+        duration:
+          type: number
         created_at:
-          type: string
-        total_time:
           type: string
         device_id:
           type: string
@@ -461,7 +461,7 @@ components:
           type: number
         total_distance:
           type: number
-        total_calory:
+        total_calories:
           type: number
         heart_rate:
           type: number
@@ -474,8 +474,8 @@ components:
           type: string
         device_id:
           type: string
-        total_time:
-          type: string
+        duration:
+          type: number
         pace:
           type: number
         workout_batch_data:
