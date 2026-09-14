@@ -48,7 +48,7 @@ func (r *DeviceRepositoryImpl) Update(c fiber.Ctx, tx *gorm.DB, device *domain.D
 	log.Debug("Updating device into database")
 	
 	result := gorm.WithResult()
-	_, err := gorm.G[domain.Device](tx, result).Where("id = ?", device.DeviceID).Updates(c, *device)
+	_, err := gorm.G[domain.Device](tx, result).Where("device_id = ?", device.DeviceID).Updates(c, *device)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database update failed")
 		return nil, err
@@ -65,7 +65,7 @@ func (r *DeviceRepositoryImpl) Delete(c fiber.Ctx, tx *gorm.DB, deviceID string)
 	log.Debug("Deleting device into database")
 	
 	result := gorm.WithResult()
-	_, err := gorm.G[domain.Device](tx, result).Where("id = ?", deviceID).Delete(c)
+	_, err := gorm.G[domain.Device](tx, result).Where("device_id = ?", deviceID).Delete(c)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database delete failed")
 		return err
@@ -82,7 +82,7 @@ func (r *DeviceRepositoryImpl) FindById(c fiber.Ctx, tx *gorm.DB, deviceID strin
 	log.Debug("Finding device by id from database")
 	
 	result := gorm.WithResult()
-	device, err := gorm.G[domain.Device](tx, result).Where("id = ?", deviceID).First(c)
+	device, err := gorm.G[domain.Device](tx, result).Where("device_id = ?", deviceID).First(c)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database find by id failed")
 		return nil, err
