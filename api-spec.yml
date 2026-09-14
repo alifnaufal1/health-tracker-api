@@ -179,7 +179,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceCreateOrUpdate"
+              $ref: "#/components/schemas/Device"
       responses:
         "200":
           description: "Success create device"
@@ -241,7 +241,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceCreateOrUpdate"
+              $ref: "#/components/schemas/Device"
       responses:
         "200":
           description: "Success update device"
@@ -423,30 +423,11 @@ components:
       properties:
         device_id:
           type: string
-        generic_access_device_name:
+        device_name:
           type: string
-        device_information_serial_number:
+        manufacturer_name:
           type: string
-        device_information_firmware_revision:
-          type: string
-        device_information_software_revision:
-          type: string
-        device_information_manufacturer_name:
-          type: string
-        user_id:
-          type: string
-    DeviceCreateOrUpdate:
-      type: object
-      properties:
-        generic_access_device_name:
-          type: string
-        device_information_serial_number:
-          type: string
-        device_information_firmware_revision:
-          type: string
-        device_information_software_revision:
-          type: string
-        device_information_manufacturer_name:
+        local_name:
           type: string
         user_id:
           type: string
