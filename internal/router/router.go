@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/logger"
 )
 
-func SetupRoutes(app *fiber.App, userController controller.UserController, deviceController controller.DeviceController) {
+func SetupRoutes(app *fiber.App, userController controller.UserController, deviceController controller.DeviceController, workoutDataController controller.WorkoutDataController) {
 	// Middleware
 	api := app.Group("/api", logger.New())
 	// api.Get("/", handler.Hello)
@@ -33,4 +33,12 @@ func SetupRoutes(app *fiber.App, userController controller.UserController, devic
 	user.Delete("/:id", deviceController.Delete)
 	user.Get("/:id", deviceController.FindByID)
 	user.Get("/", deviceController.FindAll)
+
+	// Workout Data
+	user = api.Group("/workout-data")
+	user.Post("/", workoutDataController.Create)
+	// user.Put("/:id", deviceController.Update)
+	// user.Delete("/:id", deviceController.Delete)
+	// user.Get("/:id", deviceController.FindByID)
+	// user.Get("/", deviceController.FindAll)
 }

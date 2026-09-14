@@ -64,12 +64,10 @@ func (s *DeviceServiceImpl) Create(c fiber.Ctx, request web.DeviceCreateRequest)
 	}
 	
 	device := &domain.Device{
-		Base: domain.Base{ID: uuid.New()},
+		DeviceID: request.DeviceID,
 		DeviceName: request.DeviceName,
-		SerialNumber: request.SerialNumber,
-		FirmwareRevision: request.FirmwareRevision,
-		SoftwareRevision: request.SoftwareRevision,
 		ManufacturerName: request.ManufacturerName,
+		LocalName: request.LocalName,
 		UserID: parsedUserID,
 	}
 
@@ -79,7 +77,7 @@ func (s *DeviceServiceImpl) Create(c fiber.Ctx, request web.DeviceCreateRequest)
 		return nil, errors.New(err.Error())
 	}
 
-	log.WithField("device_id", device.ID).Info("device created successfully")
+	log.WithField("device_id", device.DeviceID).Info("device created successfully")
 
 	return helper.ToDeviceResponse(device), nil
 }
@@ -109,14 +107,11 @@ func (s *DeviceServiceImpl) Update(c fiber.Ctx, request web.DeviceUpdateRequest,
 	if request.DeviceName != "" {
 		device.DeviceName = request.DeviceName
 	}
-	if request.FirmwareRevision != "" {
-		device.FirmwareRevision = request.FirmwareRevision
-	}
-	if request.SoftwareRevision != "" {
-		device.SoftwareRevision = request.SoftwareRevision
-	}
 	if request.ManufacturerName != "" {
 		device.ManufacturerName = request.ManufacturerName
+	}
+	if request.LocalName != "" {
+		device.LocalName = request.LocalName
 	}
 	if request.UserID != "" {
 		parsedUUID, err := uuid.Parse(request.UserID)
@@ -133,7 +128,7 @@ func (s *DeviceServiceImpl) Update(c fiber.Ctx, request web.DeviceUpdateRequest,
 		return nil, errors.New(err.Error())
 	}
 
-	log.WithField("device_id", device.ID).Info("device updated successfully")
+	log.WithField("device_id", device.DeviceID).Info("device updated successfully")
 
 	return helper.ToDeviceResponse(device), nil
 }
@@ -165,7 +160,7 @@ func (s *DeviceServiceImpl) Delete(c fiber.Ctx, deviceID string) error {
 		return errors.New(err.Error())
 	}
 
-	log.WithField("device_id", device.ID).Info("device deleted successfully")
+	log.WithField("device_id", device.DeviceID).Info("device deleted successfully")
 
 	return nil
 }
@@ -191,7 +186,7 @@ func (s *DeviceServiceImpl) FindByID(c fiber.Ctx, deviceID string) (*web.DeviceR
 		return nil, errors.New(err.Error())
 	}
 
-	log.WithField("device_id", device.ID).Info("device found successfully")
+	log.WithField("device_id", device.DeviceID).Info("device found successfully")
 
 	return helper.ToDeviceResponse(device), nil
 }

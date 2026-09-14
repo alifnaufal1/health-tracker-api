@@ -1,6 +1,6 @@
-package wokoutdata
+package web
 
-type WorkoutDataCreateRequest struct {
+type WorkoutDataResponse struct {
 	WorkoutDataId    string `json:"workout_data_id"`
 	WorkoutDataType  string `json:"workout_data_type"`
 	TotalSteps       int    `json:"total_steps"`
@@ -9,6 +9,6 @@ type WorkoutDataCreateRequest struct {
 	HeartRateAverage int    `json:"heart_rate_average"`
 	Pace             int    `json:"pace"`
 	CreatedAt        string `json:"created_at"`
-	TotalTime        string `json:"total_time"`
+	Duration         int64  `json:"duration"`
 	DeviceID         string `json:"service_id"`
 }

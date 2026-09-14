@@ -4,6 +4,7 @@ import (
 	"health-tracker-api/internal/model/domain"
 	webDevice "health-tracker-api/internal/model/web/device"
 	webUser "health-tracker-api/internal/model/web/user"
+	webWorkoutData "health-tracker-api/internal/model/web/workout_data"
 )
 
 func ToUserResponse(user *domain.User) *webUser.UserResponse {
@@ -20,13 +21,26 @@ func ToDeviceResponse(device *domain.Device) *webDevice.DeviceResponse {
 		userID = device.UserID.String()
 	}
 	return &webDevice.DeviceResponse{
-		DeviceID:   device.Base.ID.String(),
+		DeviceID:   device.DeviceID,
 		DeviceName: device.DeviceName,
-		SerialNumber: device.SerialNumber,
-		FirmwareRevision: device.FirmwareRevision,
-		SoftwareRevision: device.SoftwareRevision,
+		LocalName: device.LocalName,
 		ManufacturerName: device.ManufacturerName,
 		UserID: userID,
+	}
+}
+
+func ToWorkoutDataResponse(workoutData *domain.WorkoutData) *webWorkoutData.WorkoutDataResponse {
+	return &webWorkoutData.WorkoutDataResponse{
+		WorkoutDataId:   workoutData.Base.ID.String(),
+		WorkoutDataType: workoutData.WorkoutDataType,
+		TotalSteps: workoutData.TotalSteps,
+		TotalDistance: workoutData.TotalDistance,
+		TotalCalories: workoutData.TotalCalories,
+		HeartRateAverage: workoutData.HeartRateAverage,
+		Pace: workoutData.Pace,
+		Duration: workoutData.Duration,
+		CreatedAt: workoutData.Base.CreatedAt.String(),
+		DeviceID: workoutData.DeviceId,
 	}
 }
 

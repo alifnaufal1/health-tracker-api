@@ -43,6 +43,10 @@ func main() {
 	deviceService := service.NewDeviceService(deviceRepository, validate, logger)
 	deviceController := controller.NewDeviceController(deviceService, logger)
 
-	router.SetupRoutes(app, userController, deviceController)
+	workoutDataRepository := repository.NewWorkoutDataRepository(logger)
+	workoutDataService := service.NewWorkoutDataService(workoutDataRepository, validate, logger)
+	workoutDataController := controller.NewWorkoutDataController(workoutDataService, logger)
+
+	router.SetupRoutes(app, userController, deviceController, workoutDataController)
 	log.Fatal(app.Listen(":3108", fiber.ListenConfig{EnablePrefork: true}))
 }

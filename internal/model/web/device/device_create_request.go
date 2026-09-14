@@ -1,10 +1,9 @@
 package web
 
 type DeviceCreateRequest struct {
-	DeviceName       string `validate:"required,min=1,max=255" json:"device_name"`
-	SerialNumber     string `validate:"required,min=1,max=255" json:"serial_number"`
-	FirmwareRevision string `validate:"required,min=1,max=255" json:"firmware_revision"`
-	SoftwareRevision string `validate:"required,min=1,max=255" json:"software_revision"`
-	ManufacturerName string `validate:"required,min=1,max=255" json:"manufacturer_name"`
-	UserID           string `json:"user_id"`
+	DeviceID         string `validate:"required" json:"device_id"`
+	DeviceName       string `json:"device_name"`
+	ManufacturerName string `json:"manufacturer_name"`
+	LocalName        string `json:"serial_number"`
+	UserID           string `validate:"required" json:"user_id"`
 }

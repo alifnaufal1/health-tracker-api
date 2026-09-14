@@ -37,24 +37,24 @@ func (r *DeviceRepositoryImpl) Save(c fiber.Ctx, tx *gorm.DB, device *domain.Dev
 		return nil, err
 	}
 	
-	log.WithField("device_id", device.ID).Debug("Device inserted successfully")
+	log.WithField("device_id", device.DeviceID).Debug("Device inserted successfully")
 	
 	return device, nil
 }
 
 func (r *DeviceRepositoryImpl) Update(c fiber.Ctx, tx *gorm.DB, device *domain.Device) (*domain.Device, error) {
-	log := helper.LoggerWithRequestID(c, r.log).WithField("device_id", device.ID)
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device_id", device.DeviceID)
 
 	log.Debug("Updating device into database")
 	
 	result := gorm.WithResult()
-	_, err := gorm.G[domain.Device](tx, result).Where("id = ?", device.ID).Updates(c, *device)
+	_, err := gorm.G[domain.Device](tx, result).Where("id = ?", device.DeviceID).Updates(c, *device)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Database update failed")
 		return nil, err
 	}
 	
-	log.WithField("device_id", device.ID).Debug("Device updated successfully")
+	log.WithField("device_id", device.DeviceID).Debug("Device updated successfully")
 	
 	return device, nil
 }
