@@ -50,6 +50,12 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request web.UserCreateRequest) (*w
 	
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
+
+	user, _ := s.UserRepository.FindByUsername(c, tx, request.Username)
+	if user != nil {
+		log.Warn("User already registered")
+		return nil, errors.New("user already registered")
+	}
 	
 	hash, err := helper.HashPassword(request.Password)
 	if err != nil {
@@ -57,8 +63,9 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request web.UserCreateRequest) (*w
 		return nil, errors.New(err.Error())
 	}
 
-	user := &domain.User{
+	user = &domain.User{
 		Base: domain.Base{ID: uuid.New()},
+		Username: request.Username,
 		Password: hash,
 		Name: request.Name,
 		NickName: request.NickName,

@@ -2,6 +2,7 @@ package helper
 
 import (
 	"health-tracker-api/internal/model/domain"
+	webAuth "health-tracker-api/internal/model/web/auth"
 	webDevice "health-tracker-api/internal/model/web/device"
 	webUser "health-tracker-api/internal/model/web/user"
 	webWorkoutData "health-tracker-api/internal/model/web/workout_data"
@@ -42,6 +43,13 @@ func ToWorkoutDataResponse(workoutData *domain.WorkoutData) *webWorkoutData.Work
 		CreatedAt: workoutData.Base.CreatedAt.String(),
 		DeviceID: workoutData.DeviceId,
 	}
+}
+
+func ToAuthResponse(token *string, user *domain.User) *webAuth.AuthLoginResponse {
+	return &webAuth.AuthLoginResponse{
+		Token: *token,
+		User: *ToUserResponse(user),
+	}	
 }
 
 func ToResponses[A any, B any](data *[]A, toResponse func(*A) *B) *[]B {

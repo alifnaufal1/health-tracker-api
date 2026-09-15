@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -31,14 +32,19 @@ func main() {
 		ErrorHandler: middleware.GlobalErrorHandler,
 	})
 	app.Use(requestid.New())
+	app.Use(cors.New())
 
 	database.ConnectDB()
 	validate := validator.New()
 
+	
 	userRepository := repository.NewUserRepository(logger)
 	userService := service.NewUserService(userRepository, validate, logger)
 	userController := controller.NewUserController(userService, logger)
-
+	
+	authService := service.NewAuthService(userService, userRepository, validate, logger)
+	authController := controller.NewAuthController(authService, logger)
+	
 	deviceRepository := repository.NewDeviceRepository(logger)
 	deviceService := service.NewDeviceService(deviceRepository, validate, logger)
 	deviceController := controller.NewDeviceController(deviceService, logger)
@@ -47,6 +53,6 @@ func main() {
 	workoutDataService := service.NewWorkoutDataService(workoutDataRepository, validate, logger)
 	workoutDataController := controller.NewWorkoutDataController(workoutDataService, logger)
 
-	router.SetupRoutes(app, userController, deviceController, workoutDataController)
+	router.SetupRoutes(app, userController, authController, deviceController, workoutDataController)
 	log.Fatal(app.Listen(":3108", fiber.ListenConfig{EnablePrefork: true}))
 }

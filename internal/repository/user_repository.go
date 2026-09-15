@@ -14,6 +14,7 @@ type UserRepository interface {
 	Update(ctx fiber.Ctx, tx *gorm.DB, user *domain.User) (*domain.User, error)
 	Delete(ctx fiber.Ctx, tx *gorm.DB, userID string) error
 	FindById(ctx fiber.Ctx, tx *gorm.DB, userID string) (*domain.User, error)
+	FindByUsername(ctx fiber.Ctx, tx *gorm.DB, username string) (*domain.User, error)
 	FindAll(ctx fiber.Ctx, tx *gorm.DB) (*[]domain.User, error)
 }
 
@@ -88,6 +89,22 @@ func (r *UserRepositoryImpl) FindById(ctx fiber.Ctx, tx *gorm.DB, userID string)
 	}
 	
 	log.WithField("user_id", userID).Debug("User found by id successfully")
+	
+	return &user, nil
+}
+
+func (r *UserRepositoryImpl) FindByUsername(ctx fiber.Ctx, tx *gorm.DB, username string) (*domain.User, error) {
+	log := helper.LoggerWithRequestID(ctx, r.log).WithField("username", username)
+	
+	log.Debug("Finding user by id from database")
+	
+	user, err := gorm.G[domain.User](tx).Where("username = ?", username).First(ctx)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Database find by username failed")
+		return nil, err
+	}
+	
+	log.WithField("username", username).Debug("User found by username successfully")
 	
 	return &user, nil
 }
