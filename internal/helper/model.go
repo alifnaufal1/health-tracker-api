@@ -13,6 +13,7 @@ func ToUserResponse(user *domain.User) *webUser.UserResponse {
 		UserID:   user.Base.ID.String(),
 		Name: user.Name,
 		NickName: user.NickName,
+		Username: user.Username,
 	}
 }
 
