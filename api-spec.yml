@@ -282,6 +282,72 @@ paths:
                     type: "number"
                   status:
                     type: string
+  /devices/{DeviceId}/workout-data:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "Get workout data by device id"
+      summary: "Get workout data by device id"
+      parameters:
+        - name: "DeviceId"
+          in: "path"
+          description: "Device Id"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Success get all workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkoutData"
+  /devices/{DeviceId}/workout-data/{WorkoutDataId}:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "Device API"
+      description: "Get workout data by device id and workout data id"
+      summary: "Get workout data by device id and workout data id"
+      parameters:
+        - name: "DeviceId"
+          in: "path"
+          description: "Device Id"
+          required: true
+          schema:
+            type: string
+        - name: "WorkoutDataId"
+          in: "path"
+          description: "Device Id"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Success get workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/WorkoutData"
   /workout-data:
     get:
       security:
