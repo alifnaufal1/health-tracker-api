@@ -1,0 +1,110 @@
+package device
+
+import (
+	"health-tracker-api/pkg/helper"
+
+	"github.com/gofiber/fiber/v3"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
+type DeviceRepository interface {
+	Save(c fiber.Ctx, tx *gorm.DB, device *Device) (*Device, error)
+	Update(c fiber.Ctx, tx *gorm.DB, device *Device) (*Device, error)
+	Delete(c fiber.Ctx, tx *gorm.DB, deviceId string) error
+	FindById(c fiber.Ctx, tx *gorm.DB, deviceId string) (*Device, error)
+	FindAll(c fiber.Ctx, tx *gorm.DB) (*[]Device, error)
+}
+
+type DeviceRepositoryImpl struct {
+	log *logrus.Logger
+}
+
+func NewDeviceRepository(log *logrus.Logger) DeviceRepository {
+	return &DeviceRepositoryImpl{log: log}
+}
+
+func (r *DeviceRepositoryImpl) Save(c fiber.Ctx, tx *gorm.DB, device *Device) (*Device, error) {
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device", device)
+
+	log.Debug("Inserting new device into database")
+	
+	result := gorm.WithResult()
+	err := gorm.G[Device](tx, result).Create(c, device)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Database insert failed")
+		return nil, err
+	}
+	
+	log.WithField("device_id", device.DeviceID).Debug("Device inserted successfully")
+	
+	return device, nil
+}
+
+func (r *DeviceRepositoryImpl) Update(c fiber.Ctx, tx *gorm.DB, device *Device) (*Device, error) {
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device_id", device.DeviceID)
+
+	log.Debug("Updating device into database")
+	
+	result := gorm.WithResult()
+	_, err := gorm.G[Device](tx, result).Where("device_id = ?", device.DeviceID).Updates(c, *device)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Database update failed")
+		return nil, err
+	}
+	
+	log.WithField("device_id", device.DeviceID).Debug("Device updated successfully")
+	
+	return device, nil
+}
+
+func (r *DeviceRepositoryImpl) Delete(c fiber.Ctx, tx *gorm.DB, deviceID string) error {
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device_id", deviceID)
+	
+	log.Debug("Deleting device into database")
+	
+	result := gorm.WithResult()
+	_, err := gorm.G[Device](tx, result).Where("device_id = ?", deviceID).Delete(c)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Database delete failed")
+		return err
+	}
+	
+	log.WithField("device_id", deviceID).Debug("Device deleted successfully")
+	
+	return nil
+}
+
+func (r *DeviceRepositoryImpl) FindById(c fiber.Ctx, tx *gorm.DB, deviceID string) (*Device, error) {
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device_id", deviceID)
+
+	log.Debug("Finding device by id from database")
+	
+	result := gorm.WithResult()
+	device, err := gorm.G[Device](tx, result).Where("device_id = ?", deviceID).First(c)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Database find by id failed")
+		return nil, err
+	}
+	
+	log.WithField("device_id", deviceID).Debug("Device found by id successfully")
+	
+	return &device, nil
+}
+
+func (r *DeviceRepositoryImpl) FindAll(c fiber.Ctx, tx *gorm.DB) (*[]Device, error) {
+	log := helper.LoggerWithRequestID(c, r.log)
+
+	log.Debug("Finding all devices from database")
+	
+	result := gorm.WithResult()
+	devices, err := gorm.G[Device](tx, result).Find(c)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Database find all failed")
+		return nil, err
+	}
+	
+	log.Debug("All device found successfully")
+	
+	return &devices, nil
+}

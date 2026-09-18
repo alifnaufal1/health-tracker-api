@@ -2,11 +2,8 @@ package database
 
 import (
 	"fmt"
-	"health-tracker-api/internal/config"
-	"health-tracker-api/internal/model/domain"
+	"health-tracker-api/config"
 	"strconv"
-
-	// "app/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -34,6 +31,10 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Connection Opened to Database")
-	DB.AutoMigrate(&domain.User{}, &domain.Device{}, &domain.WorkoutData{})
+	
 	fmt.Println("Database Migrated")
+}
+
+func Migrate(tables ...interface{}) error {
+	return DB.AutoMigrate(tables...)
 }

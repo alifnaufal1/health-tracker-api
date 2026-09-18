@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"health-tracker-api/internal/config"
+	"health-tracker-api/config"
 
 	jwtware "github.com/gofiber/contrib/v3/jwt"
 	"github.com/gofiber/fiber/v3"

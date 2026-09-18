@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"errors"
-	"health-tracker-api/internal/model/web"
 	"health-tracker-api/pkg/apperror"
+	"health-tracker-api/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -34,7 +34,7 @@ func GlobalErrorHandler(ctx fiber.Ctx, err error) error {
 		message = err.Error()
 	}
 
-	return ctx.Status(code).JSON(web.WebResponse{
+	return ctx.Status(code).JSON(response.WebResponse{
 		Code: code,
 		Status: false,
 		Message: message,
