@@ -17,3 +17,9 @@ type ConflictError struct {
 }
 
 func (e *ConflictError) Error() string { return e.Message }
+
+type ForbiddenError struct {
+	Message string
+}
+
+func (e *ForbiddenError) Error() string { return e.Message }

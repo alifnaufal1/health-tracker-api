@@ -9,8 +9,8 @@ import (
 func RegisterDeviceRoutes(api fiber.Router, handler DeviceHandler) {
 	device := api.Group("/device")
 	device.Post("", handler.Create)
-	device.Put("/:id", middleware.Protected(), handler.Update)
-	device.Delete("/:id", middleware.Protected(), handler.Delete)
-	device.Get("/:id", middleware.Protected(), handler.FindByID)
-	device.Get("", middleware.Protected(), handler.FindAll)
+	device.Put("/:id", middleware.JwtProtected(), handler.Update)
+	device.Delete("/:id", middleware.JwtProtected(), handler.Delete)
+	device.Get("/:id", middleware.JwtProtected(), handler.FindByID)
+	device.Get("", middleware.JwtProtected(), handler.FindAll)
 }

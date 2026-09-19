@@ -20,6 +20,7 @@ type DeviceService interface {
 	Delete(c fiber.Ctx, deviceID string) error
 	FindByID(c fiber.Ctx, deviceID string) (*DeviceResponse, error)
 	FindAll(c fiber.Ctx) (*[]DeviceResponse, error)
+	IsOwnedByUser(c fiber.Ctx, deviceID string, userID uuid.UUID) (bool, error)
 }
 
 type DeviceServiceImpl struct {
@@ -205,6 +206,21 @@ func (s *DeviceServiceImpl) FindAll(c fiber.Ctx) (*[]DeviceResponse, error) {
 	log.Info("devices found successfully")
 
 	return response.ToResponses(devices, toDeviceResponse), nil
+}
+
+func (s *DeviceServiceImpl) IsOwnedByUser(c fiber.Ctx, deviceID string, userID uuid.UUID) (bool, error) {
+	log := helper.LoggerWithRequestID(c, s.log).WithField("user_id", userID)
+	
+	tx := database.DB.Begin()
+	defer helper.CommitOrRollback(tx)
+	
+	device, err := s.deviceRepository.FindById(c, tx, deviceID)
+	if err != nil {
+		return false, err
+	}
+	log.WithField("device", device).Info("devices found successfully")
+
+	return *device.UserID == userID, nil
 }
 
 func toDeviceResponse(device *Device) *DeviceResponse {

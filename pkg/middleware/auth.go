@@ -2,24 +2,41 @@ package middleware
 
 import (
 	"health-tracker-api/config"
+	"health-tracker-api/pkg/context"
+	"strings"
 
-	jwtware "github.com/gofiber/contrib/v3/jwt"
 	"github.com/gofiber/fiber/v3"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
-// Protected protect routes
-func Protected() fiber.Handler {
-	return jwtware.New(jwtware.Config{
-		SigningKey:   jwtware.SigningKey{Key: []byte(config.Config("SECRET"))},
-		ErrorHandler: jwtError,
-	})
-}
+func JwtProtected() fiber.Handler {
+	return func(c fiber.Ctx) error {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing or invalid authorization header"})
+		}
 
-func jwtError(c fiber.Ctx, err error) error {
-	if err.Error() == "Missing or malformed JWT" {
-		return c.Status(fiber.StatusBadRequest).
-			JSON(fiber.Map{"status": "error", "message": "Missing or malformed JWT", "data": nil})
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+			return []byte(config.Config("SECRET")), nil
+		})
+		if err != nil || !token.Valid {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid or expired token"})
+		}
+
+		claims := token.Claims.(jwt.MapClaims)
+
+		userID, err := uuid.Parse(claims["user_id"].(string))
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid token payload"})
+		}
+
+		context.SetAuthUser(c, &context.AuthenticatedUser{
+			UserID:   userID,
+			Username: claims["username"].(string),
+		})
+
+		return c.Next()
 	}
-	return c.Status(fiber.StatusUnauthorized).
-		JSON(fiber.Map{"status": "error", "message": "Invalid or expired JWT", "data": nil})
 }

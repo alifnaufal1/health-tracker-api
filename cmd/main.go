@@ -52,7 +52,7 @@ func main() {
 	deviceController := device.NewDeviceHandler(deviceService, logger)
 
 	workoutDataRepository := workout_data.NewWorkoutDataRepository(logger)
-	workoutDataService := workout_data.NewWorkoutDataService(workoutDataRepository, validate, logger)
+	workoutDataService := workout_data.NewWorkoutDataService(workoutDataRepository, validate, logger, deviceService)
 	workoutDataController := workout_data.NewWorkoutDataHandler(workoutDataService)
 
 	router.SetupRoutes(app, userController, authController, deviceController, workoutDataController)

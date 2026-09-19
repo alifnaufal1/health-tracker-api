@@ -10,7 +10,7 @@ type WorkoutDataHandler interface {
 	Create(c fiber.Ctx) error
 	// Update(c fiber.Ctx) error
 	// Delete(c fiber.Ctx) error
-	// FindOne(c fiber.Ctx) error
+	GetByDeviceID(c fiber.Ctx) error
 	// FindAll(c fiber.Ctx) error
 }
 
@@ -37,5 +37,14 @@ func (h *WorkoutDataHandlerImpl) Create(c fiber.Ctx) error {
 	}
 	
 	return response.Success(c, createdWorkoutData, "success create new workout data")
+}
+
+func (h *WorkoutDataHandlerImpl) GetByDeviceID(c fiber.Ctx) error {	
+	workoutData, err := h.WorkoutDataService.GetByDeviceID(c, c.Params("deviceId"))
+	if err != nil {
+		return err
+	}
+	
+	return response.Success(c, workoutData, "success get all workout data")
 }
 

@@ -27,7 +27,7 @@ func Error(c fiber.Ctx, code int, message string) error {
 	})
 }
 
-func ToResponses[A any, B any](data *[]A, toResponse func(*A) *B) *[]B {
+func ToResponses[A, B any](data *[]A, toResponse func(*A) *B) *[]B {
 	var dataResponses []B
 	for i := range *data {
 		dataResponses = append(dataResponses, *toResponse(&(*data)[i]))

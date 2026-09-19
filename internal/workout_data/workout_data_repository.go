@@ -10,8 +10,9 @@ import (
 
 type WorkoutDataRepository interface {
 	Save(c fiber.Ctx, tx *gorm.DB, workoutData *WorkoutData) (*WorkoutData, error)
-	Delete(c fiber.Ctx, tx *gorm.DB, workoutDataId string) error
-	FindOne(c fiber.Ctx, tx *gorm.DB, workoutDataId string) (*WorkoutData, error)
+	Delete(c fiber.Ctx, tx *gorm.DB, workoutDataID string) error
+	FindByID(c fiber.Ctx, tx *gorm.DB, workoutDataID string) (*WorkoutData, error)
+	FindByDeviceID(c fiber.Ctx, tx *gorm.DB, deviceID string) ([]WorkoutData, error)
 	FindAll(c fiber.Ctx, tx *gorm.DB) (*[]WorkoutData, error)
 }
 
@@ -57,7 +58,7 @@ func (r *WorkoutDataRepositoryImpl) Delete(c fiber.Ctx, tx *gorm.DB, workoutData
 	return nil
 }
 
-func (r *WorkoutDataRepositoryImpl) FindOne(c fiber.Ctx, tx *gorm.DB, workoutDataID string) (*WorkoutData, error) {
+func (r *WorkoutDataRepositoryImpl) FindByID(c fiber.Ctx, tx *gorm.DB, workoutDataID string) (*WorkoutData, error) {
 	log := helper.LoggerWithRequestID(c, r.log).WithField("workout_data_id", workoutDataID)
 
 	log.Debug("Finding workout data by id from database")
@@ -72,6 +73,24 @@ func (r *WorkoutDataRepositoryImpl) FindOne(c fiber.Ctx, tx *gorm.DB, workoutDat
 	log.WithField("workout_data_id", workoutDataID).Debug("Workout data found by id successfully")
 	
 	return &workoutData, nil
+}
+
+func (r *WorkoutDataRepositoryImpl) FindByDeviceID(c fiber.Ctx, tx *gorm.DB, deviceID string) ([]WorkoutData, error) {
+	log := helper.LoggerWithRequestID(c, r.log).WithField("device_id", deviceID)
+
+	log.Debug("Finding workout data by device_id from database")
+	
+	result := gorm.WithResult()
+	workoutDatas := make([]WorkoutData, 0)
+	workoutDatas, err := gorm.G[WorkoutData](tx, result).Where("device_id = ?", deviceID).Find(c)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Workout data find by device_id failed")
+		return nil, err
+	}
+	
+	log.WithField("device_id", deviceID).Debug("Workout data found by device_id successfully")
+	
+	return workoutDatas, nil
 }
 
 func (r *WorkoutDataRepositoryImpl) FindAll(c fiber.Ctx, tx *gorm.DB) (*[]WorkoutData, error) {
