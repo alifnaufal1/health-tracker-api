@@ -2,7 +2,6 @@ package user
 
 import (
 	"github.com/gofiber/fiber/v3"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -15,109 +14,59 @@ type UserRepository interface {
 	FindAll(ctx fiber.Ctx, tx *gorm.DB) (*[]User, error)
 }
 
-type UserRepositoryImpl struct {
-	log *logrus.Logger
-}
+type UserRepositoryImpl struct {}
 
-func NewUserRepository(log *logrus.Logger) UserRepository {
-	return &UserRepositoryImpl{log: log}
+func NewUserRepository() UserRepository {
+	return &UserRepositoryImpl{}
 }
 
 func (r *UserRepositoryImpl) Save(ctx fiber.Ctx, tx *gorm.DB, user *User) (*User, error) {
-	log := r.log.WithField("user", user)
-
-	log.Debug("Inserting new user into database")
-
 	result := gorm.WithResult()
 	err := gorm.G[User](tx, result).Create(ctx, user)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Database insert failed")
 		return nil, err
 	}
-
-	log.WithField("user_id", user.ID).Debug("User inserted successfully")
-
 	return user, nil
 }
 
 func (r *UserRepositoryImpl) Update(ctx fiber.Ctx, tx *gorm.DB, user *User) (*User, error) {
-	log := r.log.WithField("user_id", user.ID)
-
-	log.Debug("Updating user into database")
-
 	result := gorm.WithResult()
 	_, err := gorm.G[User](tx, result).Where("id = ?", user.ID).Updates(ctx, *user)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Database update failed")
 		return nil, err
 	}
-
-	log.WithField("user_id", user.ID).Debug("User updated successfully")
-
 	return user, nil
 }
 
 func (r *UserRepositoryImpl) Delete(ctx fiber.Ctx, tx *gorm.DB, userID string) error {
-	log := r.log.WithField("user_id", userID)
-
-	log.Debug("Deleting user from database")
-
 	result := gorm.WithResult()
 	_, err := gorm.G[User](tx, result).Where("id = ?", userID).Delete(ctx)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Database delete failed")
 		return err
 	}
-
-	log.WithField("user_id", userID).Debug("User deleted successfully")
-
 	return nil
 }
 
 func (r *UserRepositoryImpl) FindById(ctx fiber.Ctx, tx *gorm.DB, userID string) (*User, error) {
-	log := r.log.WithField("user_id", userID)
-
-	log.Debug("Finding user by id from database")
-
 	user, err := gorm.G[User](tx).Where("id = ?", userID).First(ctx)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Database find by id failed")
 		return nil, err
 	}
-
-	log.WithField("user_id", userID).Debug("User found by id successfully")
-
 	return &user, nil
 }
 
 func (r *UserRepositoryImpl) FindByUsername(ctx fiber.Ctx, tx *gorm.DB, username string) (*User, error) {
-	log := r.log.WithField("username", username)
-
-	log.Debug("Finding user by id from database")
-
 	user, err := gorm.G[User](tx).Where("username = ?", username).First(ctx)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Database find by username failed")
 		return nil, err
 	}
-
-	log.WithField("username", username).Debug("User found by username successfully")
-
 	return &user, nil
 }
 
 func (r *UserRepositoryImpl) FindAll(ctx fiber.Ctx, tx *gorm.DB) (*[]User, error) {
-	log := r.log.WithContext(ctx)
-
-	log.Debug("Finding all user from database")
-
 	users, err := gorm.G[User](tx).Find(ctx)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Database find all failed")
 		return &users, err
 	}
-
-	log.Debug("All user found successfully")
-
 	return &users, nil
 }

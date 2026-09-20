@@ -1,7 +1,7 @@
 package workout_data
 
 import (
-	"errors"
+	"fmt"
 	"health-tracker-api/pkg/apperror"
 	"health-tracker-api/pkg/context"
 	"health-tracker-api/pkg/database"
@@ -13,43 +13,42 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type DeviceChecker interface {
-	IsOwnedByUser(c fiber.Ctx, deviceID string, userID uuid.UUID) (bool, error)
+	IsOwnedByUser(c fiber.Ctx, tx *gorm.DB, deviceID string, userID uuid.UUID) (bool, error)
 }
 
 type WorkoutDataService interface {
 	Create(c fiber.Ctx, request WorkoutDataCreateRequest) (*WorkoutDataResponse, error)
-	// Delete(c fiber.Ctx, workoutDataID string) error
-	// FindByID(c fiber.Ctx, workoutDataID string) (*WorkoutDataResponse, error)
 	GetByDeviceID(c fiber.Ctx, deviceID string) (*[]WorkoutDataResponse, error)
-	// FindByAll(c fiber.Ctx) (*[]WorkoutDataResponse, error)
 }
 
 type WorkoutDataServiceImpl struct {
 	workoutDataRepository WorkoutDataRepository
 	validate *validator.Validate
-	log *logrus.Logger
+	log *logrus.Entry
 	deviceChecker DeviceChecker 
 }
 
-func NewWorkoutDataService(workoutDataRepository WorkoutDataRepository, validate *validator.Validate, log *logrus.Logger, deviceChecker DeviceChecker) WorkoutDataService {
+func NewWorkoutDataService(workoutDataRepository WorkoutDataRepository, validate *validator.Validate, base *logrus.Logger, deviceChecker DeviceChecker) WorkoutDataService {
 	return &WorkoutDataServiceImpl{
 		workoutDataRepository: workoutDataRepository,
 		validate: validate,
-		log: log,
+		log: helper.NewModuleLogger(base, "service", "workout_data"),
 		deviceChecker: deviceChecker,
 	}
 }
 
 func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRequest) (*WorkoutDataResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log)
-	log.WithField("request", request).Info("Received create workout data request")
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("request", request)
+	
+	log.Debug("received create workout data request")
 	
 	err := s.validate.Struct(request)
 	if err != nil {
-		log.WithField("error", err.Error()).Warn("Validation failed for create workout data request")
+		log.WithError(err).Warn("failed to validate create workout data request")
 		return nil, &apperror.ValidationError{Message: err.Error()}
 	}
 	
@@ -80,50 +79,54 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 
 	workoutData, err = s.workoutDataRepository.Save(c, tx, workoutData)
 	if err != nil {
-		log.Warn("Create workout data process failed at layer")
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to save workout data")
+		return nil, fmt.Errorf("save workout data: %w", err)
 	}
 
-	log.WithField("workout_data_id", workoutData.ID).Info("workout data created successfully")
+	log.WithField("workout_data_id", workoutData.ID).Debug("workout data created successfully")
 
 	return toWorkoutDataResponse(workoutData), nil
 }
 
 func (s *WorkoutDataServiceImpl) GetByDeviceID(c fiber.Ctx, deviceID string) (*[]WorkoutDataResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log).WithField("device_id", deviceID)
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("device_id", deviceID)
 	
-	log.Info("Received find workout data by device_id request")
+	log.Debug("received find workout data by device_id request")
 
 	if deviceID == "" {
-		log.Warn("Validation failed for find workout data by device_id request")
+		log.Warn("validation failed: device_id required")
 		return nil, &apperror.ValidationError{Message: "device_id required"}
 	}
 	
 	authUser, err := context.GetAuthUser(c)
 	if err != nil {
-		log.WithField("authUser", authUser).Warn("User not authenticated")
+		log.WithError(err).Warn("user not authenticated")
 		return nil, err
 	}
-
-	owned, err := s.deviceChecker.IsOwnedByUser(c, deviceID, authUser.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if !owned {
-		return nil, &apperror.ForbiddenError{Message: "This workout data is belongs to another device"}
-	}
+	log = log.WithField("user_id", authUser.UserID)
 
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
-
-	workout_datas, err := s.workoutDataRepository.FindByDeviceID(c, tx, deviceID)
+	
+	owned, err := s.deviceChecker.IsOwnedByUser(c, tx, deviceID, authUser.UserID)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to check device ownership")
+		return nil, err
+	}
+	if !owned {
+		log.Warn("access denied: device belongs to another user")
+		return nil, &apperror.ForbiddenError{Message: "This device belongs to another user"}
 	}
 
-	log.WithField("workout_datas", workout_datas).Info("workout data found successfully")
+	workoutDatas, err := s.workoutDataRepository.FindByDeviceID(c, tx, deviceID)
+	if err != nil {
+		log.WithError(err).Error("failed to find workout data by device_id")
+		return nil, fmt.Errorf("find workout data by device_id %s: %w", deviceID, err)
+	}
 
-	return response.ToResponses(&workout_datas, toWorkoutDataResponse), nil
+	log.WithField("result_count", len(workoutDatas)).Debug("workout data found successfully")
+
+	return response.ToResponses(&workoutDatas, toWorkoutDataResponse), nil
 }
 
 func toWorkoutDataResponse(workoutData *WorkoutData) *WorkoutDataResponse {

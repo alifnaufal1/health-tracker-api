@@ -49,9 +49,7 @@ func (h *UserHandlerImpl) Update(c fiber.Ctx) error {
 		return err
 	}
 
-	userUpdateRequest.UserID = c.Params("id")
-
-	updatedUser, err := h.UserService.Update(c, *userUpdateRequest)
+	updatedUser, err := h.UserService.Update(c, *userUpdateRequest, c.Params("id"))
 	if err != nil {
 		return err
 	}

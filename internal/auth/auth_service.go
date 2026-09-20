@@ -16,7 +16,6 @@ import (
 type AuthService interface {
 	Register(c fiber.Ctx, request user.UserCreateRequest) (*user.UserResponse, error)
 	Login(c fiber.Ctx, request AuthLoginRequest) (*AuthLoginResponse, error)
-	// Logout(c fiber.Ctx, token string) error
 }
 
 type AuthServiceImpl struct {

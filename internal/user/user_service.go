@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"health-tracker-api/pkg/apperror"
 	"health-tracker-api/pkg/database"
 	"health-tracker-api/pkg/helper"
@@ -19,7 +20,7 @@ import (
 
 type UserService interface {
 	Create(c fiber.Ctx, request UserCreateRequest) (*UserResponse, error)
-	Update(c fiber.Ctx, request UserUpdateRequest) (*UserResponse, error)
+	Update(c fiber.Ctx, request UserUpdateRequest, userID string) (*UserResponse, error)
 	Delete(c fiber.Ctx, userID string) error
 	FindByID(c fiber.Ctx, userID string) (*UserResponse, error)
 	FindAll(c fiber.Ctx) (*[]UserResponse, error)
@@ -28,41 +29,46 @@ type UserService interface {
 type UserServiceImpl struct {
 	UserRepository UserRepository
 	Validate       *validator.Validate
-	log            *logrus.Logger
+	log            *logrus.Entry
 	
 }
 
-func NewUserService(userRepository UserRepository, validate *validator.Validate, log *logrus.Logger) UserService {
+func NewUserService(userRepository UserRepository, validate *validator.Validate, base *logrus.Logger) UserService {
 	return &UserServiceImpl{
 		UserRepository: userRepository,
 		Validate:       validate,
-		log:            log,
+		log:            helper.NewModuleLogger(base, "service", "user") ,
 	}
 }
 
 func (s *UserServiceImpl) Create(c fiber.Ctx, request UserCreateRequest) (*UserResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log)
-	log.WithField("request", request).Info("Received create user request")
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("request", request)
+
+	log.Debug("received create user request")
 
 	err := s.Validate.Struct(request)
 	if err != nil {
-		log.WithField("error", err.Error()).Warn("Validation failed for create user request")
+		log.WithError(err).Warn("failed to validate create user request")
 		return nil, &apperror.ValidationError{Message: err.Error()}
 	}
 
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
-	user, _ := s.UserRepository.FindByUsername(c, tx, request.Username)
+	user, err := s.UserRepository.FindByUsername(c, tx, request.Username)
+	if err != nil {
+		log.WithError(err).Error("failed to check registered user")
+		return nil, err
+	}
 	if user != nil {
-		log.Warn("User already registered")
-		return nil, errors.New("user already registered")
+		log.Warn("request denied: this user already registered")
+		return nil, &apperror.ConflictError{Message: "This user already registered"}
 	}
 
 	hash, err := helper.HashPassword(request.Password)
 	if err != nil {
-		log.Error("Failed to hash password")
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to hash password")
+		return nil, err
 	}
 
 	user = &User{
@@ -75,42 +81,44 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request UserCreateRequest) (*UserR
 
 	user, err = s.UserRepository.Save(c, tx, user)
 	if err != nil {
-		log.Warn("Create user process failed at repository layer")
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to save user")
+		return nil, fmt.Errorf("save user: %w", err)
 	}
 
-	log.WithField("user_id", user.ID).Info("User created successfully")
+	log.WithField("user_id", user.ID).Debug("user created successfully")
 
 	return ToUserResponse(user), nil
 }
 
-func (s *UserServiceImpl) Update(c fiber.Ctx, request UserUpdateRequest) (*UserResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log).WithField("user_id", request.UserID)
+func (s *UserServiceImpl) Update(c fiber.Ctx, request UserUpdateRequest, userID string) (*UserResponse, error) {
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("user_id", userID)
 
-	log.Info("Received update user request")
+	log.Debug("received update user request")
 
 	err := s.Validate.Struct(request)
 	if err != nil {
-		log.WithField("error", err.Error()).Warn("Validation failed for update user request")
+		log.WithError(err).Warn("failed to validate update user request")
 		return nil, &apperror.ValidationError{Message: err.Error()}
 	}
 
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
-	user, err := s.UserRepository.FindById(c, tx, request.UserID)
+	user, err := s.UserRepository.FindById(c, tx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn("not found: this user is not found")
 			return nil, &apperror.NotFoundError{Message: "user not found"}
 		}
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to find user")
+		return nil, err
 	}
 
 	if request.Password != "" {
 		hash, err := helper.HashPassword(request.Password)
 		if err != nil {
-			log.Error("Failed to hash password")
-			return nil, errors.New(err.Error())
+			log.WithError(err).Error("failed to hash password")
+			return nil, err
 		}
 		user.Password = hash
 	}
@@ -123,54 +131,56 @@ func (s *UserServiceImpl) Update(c fiber.Ctx, request UserUpdateRequest) (*UserR
 
 	user, err = s.UserRepository.Update(c, tx, user)
 	if err != nil {
-		log.Warn("Update user process failed at repository layer")
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to update workout data")
+		return nil, fmt.Errorf("update user by user_id %s: %w", userID, err)
 	}
 
-	log.WithField("user_id", user.ID).Info("User updated successfully")
+	log.WithField("user_id", userID).Debug("user updated successfully")
 
 	return ToUserResponse(user), nil
 }
 
 func (s *UserServiceImpl) Delete(c fiber.Ctx, userID string) error {
-	log := helper.LoggerWithRequestID(c, s.log).WithField("user_id", userID)
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("user_id", userID)
 
-	log.Info("Received delete user request")
+	log.Debug("received delete user request")
 
 	if userID == "" {
-		log.Warn("Validation failed for delete user request")
+		log.Warn("validation failed: user_id required")
 		return &apperror.ValidationError{Message: "user_id required"}
 	}
 
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
-	user, err := s.UserRepository.FindById(c, tx, userID)
+	_, err := s.UserRepository.FindById(c, tx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn("not found: this user is not found")
 			return &apperror.NotFoundError{Message: "user not found"}
 		}
-		return errors.New(err.Error())
+		log.WithError(err).Error("failed to find user")
+		return err
 	}
 
 	err = s.UserRepository.Delete(c, tx, userID)
 	if err != nil {
-		log.Warn("Delete user process failed at repository layer")
-		return errors.New(err.Error())
+		log.WithError(err).Error("failed to delete user by user_id")
+		return fmt.Errorf("delete user by user_id %s: %w", userID, err)
 	}
 
-	log.WithField("user_id", user.ID).Info("User deleted successfully")
+	log.WithField("user_id", userID).Debug("user deleted successfully")
 
 	return nil
 }
 
 func (s *UserServiceImpl) FindByID(c fiber.Ctx, userID string) (*UserResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log).WithField("user_id", userID)
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("user_id", userID)
 
-	log.Info("Received find user by id request")
+	log.Debug("received find user by user_id request")
 
 	if userID == "" {
-		log.Warn("Validation failed for find user by id request")
+		log.Warn("validation failed: user_id required")
 		return nil, &apperror.ValidationError{Message: "user_id required"}
 	}
 
@@ -180,30 +190,33 @@ func (s *UserServiceImpl) FindByID(c fiber.Ctx, userID string) (*UserResponse, e
 	user, err := s.UserRepository.FindById(c, tx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn("not found: this user is not found")
 			return nil, &apperror.NotFoundError{Message: "user not found"}
 		}
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to find user by user_id")
+		return nil, fmt.Errorf("find user by user_d %s: %w", userID, err)
 	}
 
-	log.WithField("user_id", user.ID).Info("User found successfully")
+	log.WithField("user_id", user.ID).Debug("user found successfully")
 
 	return ToUserResponse(user), nil
 }
 
 func (s *UserServiceImpl) FindAll(c fiber.Ctx) (*[]UserResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log)
+	log := helper.LoggerWithRequestID(c, s.log.Logger)
 
-	log.Info("Received find all user request")
+	log.Debug("received find all user request")
 
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
 	users, err := s.UserRepository.FindAll(c, tx)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		log.WithError(err).Error("failed to find all user")
+		return nil, err
 	}
 
-	log.Info("Users found successfully")
+	log.WithField("result_count", len(*users)).Debug("users found successfully")
 
 	return response.ToResponses(users, ToUserResponse), nil
 }

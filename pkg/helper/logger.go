@@ -12,3 +12,10 @@ func LoggerWithRequestID(c fiber.Ctx, log *logrus.Logger) *logrus.Entry {
 	}
 	return log.WithField("request_id", reqID)
 }
+
+func NewModuleLogger(base *logrus.Logger, layer, module string) *logrus.Entry {
+	return base.WithFields(logrus.Fields{
+		"layer":  layer,
+		"module": module,
+	})
+}

@@ -11,7 +11,6 @@ import (
 type AuthHandler interface {
 	Login(c fiber.Ctx) error
 	Register(c fiber.Ctx) error
-	// Logout(c fiber.Ctx) error
 }
 
 type AuthHandlerImpl struct {

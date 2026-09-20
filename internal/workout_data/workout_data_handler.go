@@ -8,10 +8,7 @@ import (
 
 type WorkoutDataHandler interface {
 	Create(c fiber.Ctx) error
-	// Update(c fiber.Ctx) error
-	// Delete(c fiber.Ctx) error
 	GetByDeviceID(c fiber.Ctx) error
-	// FindAll(c fiber.Ctx) error
 }
 
 type WorkoutDataHandlerImpl struct {

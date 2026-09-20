@@ -6,15 +6,17 @@ import (
 	"health-tracker-api/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/log"
 )
 
-func GlobalErrorHandler(ctx fiber.Ctx, err error) error {
+func GlobalErrorHandler(c fiber.Ctx, err error) error {
 	code := fiber.StatusInternalServerError
 	message := "Internal Server Error"
 
 	var notFoundErr *apperror.NotFoundError
 	var validationErr *apperror.ValidationError
 	var conflictErr *apperror.ConflictError
+	var forbiddenErr *apperror.ForbiddenError
 	var fiberErr *fiber.Error
 
 	switch {
@@ -27,16 +29,16 @@ func GlobalErrorHandler(ctx fiber.Ctx, err error) error {
 	case errors.As(err, &conflictErr):
 		code = fiber.StatusConflict
 		message = conflictErr.Message
+	case errors.As(err, &forbiddenErr):
+		code = fiber.StatusForbidden
+		message = forbiddenErr.Message
 	case errors.As(err, &fiberErr):
 		code = fiberErr.Code
 		message = fiberErr.Message
 	default:
-		message = err.Error()
+		log.Errorf("unhandled error : %v",  err)
+		message = "Internal Server Error"
 	}
 
-	return ctx.Status(code).JSON(response.WebResponse{
-		Code: code,
-		Status: false,
-		Message: message,
-	})
+	return response.Error(c, code, message)
 }

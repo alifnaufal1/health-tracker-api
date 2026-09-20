@@ -8,6 +8,7 @@ import (
 	"health-tracker-api/internal/user"
 	"health-tracker-api/internal/workout_data"
 	"health-tracker-api/pkg/database"
+	"health-tracker-api/pkg/logger"
 	"health-tracker-api/pkg/middleware"
 	"log"
 
@@ -16,14 +17,13 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		fmt.Println("Warning: no .env file found, using environment variables")
 	}
-	logger := logrus.New()
+	logger := logger.NewLogger()
 
 	app := fiber.New(fiber.Config{
 		CaseSensitive: true,
@@ -40,18 +40,18 @@ func main() {
 	validate := validator.New()
 
 	
-	userRepository := user.NewUserRepository(logger)
+	userRepository := user.NewUserRepository()
 	userService := user.NewUserService(userRepository, validate, logger)
 	userController := user.NewUserHandler(userService, logger)
 	
 	authService := auth.NewAuthService(userService, userRepository, validate, logger)
 	authController := auth.NewAuthHandler(authService, logger)
 	
-	deviceRepository := device.NewDeviceRepository(logger)
+	deviceRepository := device.NewDeviceRepository()
 	deviceService := device.NewDeviceService(deviceRepository, validate, logger)
 	deviceController := device.NewDeviceHandler(deviceService, logger)
 
-	workoutDataRepository := workout_data.NewWorkoutDataRepository(logger)
+	workoutDataRepository := workout_data.NewWorkoutDataRepository()
 	workoutDataService := workout_data.NewWorkoutDataService(workoutDataRepository, validate, logger, deviceService)
 	workoutDataController := workout_data.NewWorkoutDataHandler(workoutDataService)
 
