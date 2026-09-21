@@ -1,35 +1,39 @@
-version: "3.8"
-
 services:
   database:
     image: postgres:15-alpine
     container_name: healthtracker_database
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: health-tracker-db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: healthtracker_api
-    restart: always
+    restart: unless-stopped
     ports:
       - "3108:3108"
     environment:
       DB_HOST: database
       DB_PORT: 5432
-      DB_USER: admin
-      DB_PASSWORD: password
-      DB_NAME: health-tracker-db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
 volumes:
   pgdata_volume:
