@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd
 
 FROM alpine:latest
 
@@ -17,4 +17,3 @@ COPY --from=builder /app/main .
 EXPOSE 3108
 
 CMD ["./main"]
-# tapikuberadadilampumerah
