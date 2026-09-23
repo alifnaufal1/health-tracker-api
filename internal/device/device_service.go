@@ -19,8 +19,9 @@ type DeviceService interface {
 	Create(c fiber.Ctx, request DeviceCreateRequest) (*DeviceResponse, error)
 	Update(c fiber.Ctx, request DeviceUpdateRequest, deviceID string) (*DeviceResponse, error)
 	Delete(c fiber.Ctx, deviceID string) error
-	FindByID(c fiber.Ctx, deviceID string) (*DeviceResponse, error)
-	FindAll(c fiber.Ctx) (*[]DeviceResponse, error)
+	GetByUserID(c fiber.Ctx, userID string) (*DeviceResponse, error)
+	GetByID(c fiber.Ctx, deviceID string) (*DeviceResponse, error)
+	GetAll(c fiber.Ctx) (*[]DeviceResponse, error)
 	IsOwnedByUser(c fiber.Ctx, tx *gorm.DB, deviceID string, userID uuid.UUID) (bool, error)
 }
 
@@ -52,17 +53,30 @@ func (s *DeviceServiceImpl) Create(c fiber.Ctx, request DeviceCreateRequest) (*D
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
-	var parsedUserID *uuid.UUID = nil
-	if request.UserID != "" {
-		parsedUUID, err := uuid.Parse(request.UserID)
-		if err != nil {
-			log.WithError(err).Error("failed to parse user_id")
-			return nil, err
-		}
-		parsedUserID = &parsedUUID
+	device, err := s.deviceRepository.FindById(c, tx, request.DeviceID)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.WithError(err).Error("failed to find device")
+		return nil, fmt.Errorf("find device of user_id %s: %w", request.UserID, err)
 	}
+	if device != nil {
+		if device.UserID.String() == request.UserID {
+			log.Warn("request denied: this device already registered")
+			return nil, &apperror.ConflictError{Message: "this device already registered"}
+		} else {
+			log.Warn("request denied: this device already registered with another user")
+			return nil, &apperror.ForbiddenError{Message: "this device already registered with another user"}
+		}
+	}
+
+	var parsedUserID *uuid.UUID = nil
+	parsedUUID, err := uuid.Parse(request.UserID)
+	if err != nil {
+		log.WithError(err).Error("failed to parse user_id")
+		return nil, err
+	}
+	parsedUserID = &parsedUUID
 	
-	device := &Device{
+	device = &Device{
 		DeviceID: request.DeviceID,
 		DeviceName: request.DeviceName,
 		ManufacturerName: request.ManufacturerName,
@@ -168,7 +182,35 @@ func (s *DeviceServiceImpl) Delete(c fiber.Ctx, deviceID string) error {
 	return nil
 }
 
-func (s *DeviceServiceImpl) FindByID(c fiber.Ctx, deviceID string) (*DeviceResponse, error) {
+func (s *DeviceServiceImpl) GetByUserID(c fiber.Ctx, userID string) (*DeviceResponse, error) {
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("user_id", userID)
+	
+	log.Debug("received find device by user_id request")
+
+	if userID == "" {
+		log.Warn("validation failed: user_id required")
+		return nil, &apperror.ValidationError{Message: "user_id required"}
+	}
+
+	tx := database.DB.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	device, err := s.deviceRepository.FindByUserId(c, tx, userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn("not found: this device is not found")
+			return nil, &apperror.NotFoundError{Message: "device not found"}
+		}
+		log.WithError(err).Error("failed to find device")
+		return nil, err
+	}
+
+	log.WithField("device_id", device.DeviceID).Debug("device found successfully")
+
+	return toDeviceResponse(device), nil
+}
+
+func (s *DeviceServiceImpl) GetByID(c fiber.Ctx, deviceID string) (*DeviceResponse, error) {
 	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("device_id", deviceID)
 	
 	log.Debug("received find device by device_id request")
@@ -196,7 +238,7 @@ func (s *DeviceServiceImpl) FindByID(c fiber.Ctx, deviceID string) (*DeviceRespo
 	return toDeviceResponse(device), nil
 }
 
-func (s *DeviceServiceImpl) FindAll(c fiber.Ctx) (*[]DeviceResponse, error) {
+func (s *DeviceServiceImpl) GetAll(c fiber.Ctx) (*[]DeviceResponse, error) {
 	log := helper.LoggerWithRequestID(c, s.log.Logger)
 
 	log.Debug("received find all device request")

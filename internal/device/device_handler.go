@@ -1,6 +1,7 @@
 package device
 
 import (
+	"health-tracker-api/pkg/context"
 	"health-tracker-api/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -11,8 +12,9 @@ type DeviceHandler interface {
 	Create(c fiber.Ctx) error
 	Update(c fiber.Ctx) error
 	Delete(c fiber.Ctx) error
-	FindByID(c fiber.Ctx) error
-	FindAll(c fiber.Ctx) error
+	GetByUserID(c fiber.Ctx) error
+	GetByID(c fiber.Ctx) error
+	GetAll(c fiber.Ctx) error
 }
 
 type DeviceHandlerImpl struct {
@@ -33,6 +35,13 @@ func (h *DeviceHandlerImpl) Create(c fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	authUser, err := context.GetAuthUser(c)
+	if err != nil {
+		return err
+	}
+
+	deviceCreateRequest.UserID = authUser.UserID.String()
 	
 	createdDevice, err := h.DeviceService.Create(c, *deviceCreateRequest)
 	if err != nil {
@@ -48,6 +57,13 @@ func (h *DeviceHandlerImpl) Update(c fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	authUser, err := context.GetAuthUser(c)
+	if err != nil {
+		return err
+	}
+
+	deviceUpdateRequest.UserID = authUser.UserID.String()
 
 	updatedUser, err := h.DeviceService.Update(c, *deviceUpdateRequest, c.Params("id"))
 	if err != nil {
@@ -66,8 +82,13 @@ func (h *DeviceHandlerImpl) Delete(c fiber.Ctx) error {
 	return response.Success(c, nil, "success delete device")
 }
 
-func (h *DeviceHandlerImpl) FindByID(c fiber.Ctx) error {	
-	user, err := h.DeviceService.FindByID(c, c.Params("id"))
+func (h *DeviceHandlerImpl) GetByUserID(c fiber.Ctx) error {
+	authUser, err := context.GetAuthUser(c)
+	if err != nil {
+		return err
+	}
+	
+	user, err := h.DeviceService.GetByUserID(c, authUser.UserID.String())
 	if err != nil {
 		return err
 	}
@@ -75,8 +96,17 @@ func (h *DeviceHandlerImpl) FindByID(c fiber.Ctx) error {
 	return response.Success(c, user, "success find device")
 }
 
-func (h *DeviceHandlerImpl) FindAll(c fiber.Ctx) error {	
-	users, err := h.DeviceService.FindAll(c)
+func (h *DeviceHandlerImpl) GetByID(c fiber.Ctx) error {	
+	user, err := h.DeviceService.GetByID(c, c.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	return response.Success(c, user, "success find device")
+}
+
+func (h *DeviceHandlerImpl) GetAll(c fiber.Ctx) error {	
+	users, err := h.DeviceService.GetAll(c)
 	if err != nil {
 		return err
 	}

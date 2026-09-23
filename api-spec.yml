@@ -179,7 +179,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Device"
+              $ref: "#/components/schemas/DeviceCreateOrUpdate"
       responses:
         "200":
           description: "Success create device"
@@ -496,6 +496,17 @@ components:
         local_name:
           type: string
         user_id:
+          type: string
+    DeviceCreateOrUpdate:
+      type: object
+      properties:
+        device_id:
+          type: string
+        device_name:
+          type: string
+        manufacturer_name:
+          type: string
+        local_name:
           type: string
     WorkoutData:
       type: object

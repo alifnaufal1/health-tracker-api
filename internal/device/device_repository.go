@@ -10,6 +10,7 @@ type DeviceRepository interface {
 	Update(c fiber.Ctx, tx *gorm.DB, device *Device) (*Device, error)
 	Delete(c fiber.Ctx, tx *gorm.DB, deviceId string) error
 	FindById(c fiber.Ctx, tx *gorm.DB, deviceId string) (*Device, error)
+	FindByUserId(c fiber.Ctx, tx *gorm.DB, userId string) (*Device, error)
 	FindAll(c fiber.Ctx, tx *gorm.DB) (*[]Device, error)
 }
 
@@ -49,6 +50,15 @@ func (r *DeviceRepositoryImpl) Delete(c fiber.Ctx, tx *gorm.DB, deviceID string)
 func (r *DeviceRepositoryImpl) FindById(c fiber.Ctx, tx *gorm.DB, deviceID string) (*Device, error) {
 	result := gorm.WithResult()
 	device, err := gorm.G[Device](tx, result).Where("device_id = ?", deviceID).First(c)
+	if err != nil {
+		return nil, err
+	}
+	return &device, nil
+}
+
+func (r *DeviceRepositoryImpl) FindByUserId(c fiber.Ctx, tx *gorm.DB, userID string) (*Device, error) {
+	result := gorm.WithResult()
+	device, err := gorm.G[Device](tx, result).Where("user_id = ?", userID).First(c)
 	if err != nil {
 		return nil, err
 	}

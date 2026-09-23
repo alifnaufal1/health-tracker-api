@@ -58,7 +58,7 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request UserCreateRequest) (*UserR
 	user, err := s.UserRepository.FindByUsername(c, tx, request.Username)
 	if user != nil {
 		log.Warn("request denied: this user already registered")
-		return nil, &apperror.ConflictError{Message: "This user already registered"}
+		return nil, &apperror.ConflictError{Message: "this user already registered"}
 	}
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound)  {
 		log.WithError(err).Error("failed to check registered user")
