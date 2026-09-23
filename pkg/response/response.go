@@ -9,6 +9,12 @@ type WebResponse struct {
 	Message string `json:"message"`
 }
 
+type WebResponseError struct {
+	Code    int    `json:"code"`
+	Status  bool   `json:"status"`
+	Error string `json:"error"`
+}
+
 func Success(c fiber.Ctx, data any, message string, ) error {
 	return c.Status(200).JSON(WebResponse{
 		Code:    200,
@@ -18,12 +24,11 @@ func Success(c fiber.Ctx, data any, message string, ) error {
 	})
 }
 
-func Error(c fiber.Ctx, code int, message string) error {
-	return c.Status(code).JSON(WebResponse{
+func Error(c fiber.Ctx, code int, errorMsg string) error {
+	return c.Status(code).JSON(WebResponseError{
 		Code:    code,
 		Status:  false,
-		Data:    nil,
-		Message: message,
+		Error: errorMsg,
 	})
 }
 

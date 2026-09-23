@@ -56,13 +56,13 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request UserCreateRequest) (*UserR
 	defer helper.CommitOrRollback(tx)
 
 	user, err := s.UserRepository.FindByUsername(c, tx, request.Username)
-	if err != nil {
-		log.WithError(err).Error("failed to check registered user")
-		return nil, err
-	}
 	if user != nil {
 		log.Warn("request denied: this user already registered")
 		return nil, &apperror.ConflictError{Message: "This user already registered"}
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound)  {
+		log.WithError(err).Error("failed to check registered user")
+		return nil, err
 	}
 
 	hash, err := helper.HashPassword(request.Password)

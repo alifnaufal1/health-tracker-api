@@ -1,6 +1,7 @@
 package user
 
 import (
+	"health-tracker-api/pkg/context"
 	"health-tracker-api/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -11,8 +12,9 @@ type UserHandler interface {
 	Create(c fiber.Ctx) error
 	Update(c fiber.Ctx) error
 	Delete(c fiber.Ctx) error
-	FindByID(c fiber.Ctx) error
-	FindAll(c fiber.Ctx) error
+	GetByID(c fiber.Ctx) error
+	GetAll(c fiber.Ctx) error
+	GetByMe(c fiber.Ctx) error
 }
 
 type UserHandlerImpl struct {
@@ -66,7 +68,7 @@ func (h *UserHandlerImpl) Delete(c fiber.Ctx) error {
 	return response.Success(c, nil, "success delete user")
 }
 
-func (h *UserHandlerImpl) FindByID(c fiber.Ctx) error {
+func (h *UserHandlerImpl) GetByID(c fiber.Ctx) error {
 	user, err := h.UserService.FindByID(c, c.Params("id"))
 	if err != nil {
 		return err
@@ -75,11 +77,24 @@ func (h *UserHandlerImpl) FindByID(c fiber.Ctx) error {
 	return response.Success(c, user, "success find user")
 }
 
-func (h *UserHandlerImpl) FindAll(c fiber.Ctx) error {
+func (h *UserHandlerImpl) GetAll(c fiber.Ctx) error {
 	users, err := h.UserService.FindAll(c)
 	if err != nil {
 		return err
 	}
 
 	return response.Success(c, users, "success find all users")
+}
+
+func (h *UserHandlerImpl) GetByMe(c fiber.Ctx) error {
+	authUser, err := context.GetAuthUser(c)
+	if err != nil {
+		return err
+	}
+	user, err := h.UserService.FindByID(c, authUser.UserID.String())
+	if err != nil {
+		return err
+	}
+	
+	return response.Success(c, user, "success find user")
 }
