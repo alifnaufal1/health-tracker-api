@@ -10,22 +10,28 @@ import (
 
 type WorkoutData struct {
 	model.Base
-	WorkoutDataType  string                                `gorm:"not null"`
-	TotalSteps       int                                   `gorm:"not null"`
-	TotalDistance    int                                   `gorm:"not null"`
-	TotalCalories    int                                   `gorm:"not null"`
-	HeartRateAverage int                                   `gorm:"not null"`
-	Pace             int                                   `gorm:"not null"`
-	Duration 		 int64 								   `gorm:"not null"`
-	WorkoutBatchData datatypes.JSONSlice[WorkoutBatchData] `gorm:"type:jsonb;not null"`
+	WorkoutDataType  string                                  `gorm:"not null"`
+	TotalSteps       float64                                     `gorm:"not null"`
+	TotalDistance    float64                                     `gorm:"not null"`
+	TotalCalories    float64                                     `gorm:"not null"`
+	HeartRateAvg     float64                                     `gorm:"not null"`
+	HeartRateMax     float64                                     `gorm:"not null"`
+	HeartRateOverTime datatypes.JSONSlice[HeartRateOverTime] `gorm:"not null"`
+	PaceAvg          float64                                     `gorm:"not null"`
+	PaceMax          float64                                     `gorm:"not null"`
+	DetailPerKm      datatypes.JSONSlice[DetailPerKm]        `gorm:"not null"`
+	EndedAt 		 time.Time 							     `gorm:"not null"`
+	Duration 		 int64 							         `gorm:"not null"`
 	DeviceId         string
 	Device           device.Device
 }
 
-type WorkoutBatchData struct {
-	TotalSteps       int `validate:"required" json:"total_steps"`
-	TotalDistance    int `validate:"required" json:"total_distance"`
-	TotalCalories    int `validate:"required" json:"total_calories"`
-	HeartRate        int `validate:"required" json:"heart_rate"`
-	CreatedAt        time.Time `validate:"required" json:"created_at"`
+type HeartRateOverTime struct {
+	HeartRate float64    `json:"heart_rate"`
+	CreatedAt string `json:"created_at"`
+}
+
+type DetailPerKm struct {
+	PaceAvg      float64    `json:"pace_avg"`
+	HeartRateAvg float64    `json:"heart_rate_avg"`
 }

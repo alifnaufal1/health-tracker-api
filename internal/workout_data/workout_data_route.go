@@ -8,9 +8,10 @@ import (
 
 func RegisterWorkoutDataRoutes(router fiber.Router, handler WorkoutDataHandler) {
 	router.Get("/devices/:deviceId/workout-data", middleware.JwtProtected(), handler.GetByDeviceID)
-	router.Post("/workout-data", middleware.JwtProtected(), handler.Create)
-	// workoutData.Put("/:id", middleware.Protected(), handler.Update)
-	// workoutData.Delete("/:id", middleware.Protected(), handler.Delete)
-	// workoutData.Get("/:id", middleware.Protected(), handler.FindByID)
-	// workoutData.Get("", middleware.Protected(), handler.FindAll)
+	router.Post("/devices/:deviceId/workout-data", middleware.JwtProtected(), handler.Create)
+	
+	workout_data := router.Group("/workout-data")
+
+	workout_data.Get("/:id", middleware.JwtProtected())
+	workout_data.Delete("/:id", middleware.JwtProtected())
 }

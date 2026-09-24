@@ -27,6 +27,8 @@ func (h *WorkoutDataHandlerImpl) Create(c fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	workoutDataCreateRequest.DeviceID = c.Params("deviceId")
 	
 	createdWorkoutData, err := h.WorkoutDataService.Create(c, *workoutDataCreateRequest)
 	if err != nil {
@@ -37,7 +39,7 @@ func (h *WorkoutDataHandlerImpl) Create(c fiber.Ctx) error {
 }
 
 func (h *WorkoutDataHandlerImpl) GetByDeviceID(c fiber.Ctx) error {	
-	workoutData, err := h.WorkoutDataService.GetByDeviceID(c, c.Params("deviceId"))
+	workoutData, err := h.WorkoutDataService.GetAll(c, c.Params("deviceId"))
 	if err != nil {
 		return err
 	}
