@@ -12,7 +12,7 @@ type WorkoutBatchData struct {
 	TotalDistance float64 `validate:"required" json:"total_distance"`
 	TotalCalories float64 `validate:"required" json:"total_calories"`
 	HeartRate     float64 `validate:"required" json:"heart_rate"`
-	Pace          float64 `validate:"required" json:"pace"`
+	Pace          string  `validate:"required" json:"pace"`
 	CreatedAt     string  `validate:"required" json:"created_at"`
 }
 
@@ -25,8 +25,8 @@ type WorkoutDataResponse struct {
 	HeartRateAvg      float64             `json:"heart_rate_avg"`
 	HeartRateMax      float64             `json:"heart_rate_max"`
 	HeartRateOverTime []HeartRateOverTime `json:"heart_rate_overtime"`
-	PaceAvg           float64             `json:"pace_avg"`
-	PaceMax           float64             `json:"pace_max"`
+	PaceAvg           string              `json:"pace_avg"`
+	PaceMax           string              `json:"pace_max"`
 	DetailPerKm       []DetailPerKm       `json:"detail_per_km"`
 	CreatedAt         string              `json:"created_at"`
 	EndedAt           string              `json:"ended_at"`

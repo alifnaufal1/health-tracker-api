@@ -17,8 +17,8 @@ type WorkoutData struct {
 	HeartRateAvg     float64                                     `gorm:"not null"`
 	HeartRateMax     float64                                     `gorm:"not null"`
 	HeartRateOverTime datatypes.JSONSlice[HeartRateOverTime] `gorm:"not null"`
-	PaceAvg          float64                                     `gorm:"not null"`
-	PaceMax          float64                                     `gorm:"not null"`
+	PaceAvg          string                                     `gorm:"not null"`
+	PaceMax          string                                     `gorm:"not null"`
 	DetailPerKm      datatypes.JSONSlice[DetailPerKm]        `gorm:"not null"`
 	EndedAt 		 time.Time 							     `gorm:"not null"`
 	Duration 		 int64 							         `gorm:"not null"`
@@ -32,6 +32,6 @@ type HeartRateOverTime struct {
 }
 
 type DetailPerKm struct {
-	PaceAvg      float64    `json:"pace_avg"`
+	PaceAvg      string    `json:"pace_avg"`
 	HeartRateAvg float64    `json:"heart_rate_avg"`
 }

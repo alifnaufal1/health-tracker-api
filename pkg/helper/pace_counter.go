@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -12,55 +13,68 @@ type DataOvertime struct {
 }
 
 type DetailPerKm struct {
-	PaceAvg      float64    
+	PaceAvg      string    
 	HeartRateAvg float64
 }
 
-func CountPace(isoStartTime, isoEndTime string, totalDistance *float64) (float64, error, *int64) {
+func CountPace(isoStartTime, isoEndTime *string, totalDistance *float64) (string, error, *int64) {
 	totalDistanceInKm := *totalDistance / 1000
-	startTime, err := time.Parse(time.RFC3339, isoStartTime)
-	if err != nil {	
-		return 0, err, nil
-	}	
-	fmt.Println("startTime", startTime)
-	
-	endTime, err := time.Parse(time.RFC3339, isoEndTime)
-	if err != nil {
-		return 0, err, nil
-	}
-	fmt.Println("endTime", endTime)
-	
-	duration := endTime.Unix() - startTime.Unix()
-	fmt.Println("duration", duration)
-	durationInMinute := float64(int(duration) / 60)
-	fmt.Println("durationInMinute", durationInMinute)
-	pace := durationInMinute / totalDistanceInKm
-	fmt.Println("pace", pace)
 
-	return pace, nil, &duration
+	startTime, err := time.Parse(time.RFC3339, *isoStartTime)
+	if err != nil {	
+		return "", err, nil
+	}	
+	
+	endTime, err := time.Parse(time.RFC3339, *isoEndTime)
+	if err != nil {
+		return "", err, nil
+	}
+	
+	durationInSeconds := endTime.Unix() - startTime.Unix()
+	durationInMinute := float64(durationInSeconds) / 60	
+	pace := durationInMinute / totalDistanceInKm
+	pace = math.Round(pace*100) / 100
+
+	intPart, fracPart := math.Modf(pace)
+	var finalPace string
+
+	if fracPart == float64(0) {
+		finalPace = fmt.Sprintf("%02d:%02d", int(intPart), int(fracPart))
+	} else {
+		second := fracPart * 60
+		deepIntPart, _ := math.Modf(second)
+		finalPace = fmt.Sprintf("%02d:%02d", int(intPart), int(deepIntPart))
+	}
+
+	return finalPace, nil, &durationInSeconds
 }
 
 func CountPacePerKm(totalDistance *float64, dataOvertime []DataOvertime) ([]DetailPerKm, error) {
-	var groupData []DetailPerKm = []DetailPerKm{}
+	var groupData []DetailPerKm
+	fmt.Println("groupData", groupData)
 	totalKm := int((*totalDistance + 1000 - 1) / 1000)
 	firstIndex := 0
-
+	
 	for i := 1; i <= totalKm; i++ {
 		distance := i * 1000
+		totalHeartRate := 0.0
 		for j, data := range dataOvertime {
-			totalHeartRate := 0.0
 			currentDistance := data.TotalDistance - dataOvertime[firstIndex].TotalDistance
-			if int(currentDistance) < distance{
+			if int(currentDistance) >= distance || j+1 == len(dataOvertime) {
 				totalHeartRate += data.HeartRate
-			} else {
 				firstIndex = j + 1
-				groupData[i-1].HeartRateAvg= totalHeartRate / float64(firstIndex) //i'm not sure, because heart rate not unique (there are more than one time that value is same)
-				paceAvg, err, _ := CountPace(dataOvertime[0].CreatedAt, data.CreatedAt, &currentDistance)
+				paceAvg, err, _ := CountPace(&dataOvertime[0].CreatedAt, &data.CreatedAt, &currentDistance)
 				if err != nil {
 					return nil, err
 				}
-				groupData[i-1].PaceAvg = paceAvg
+				groupData = append(groupData, DetailPerKm{
+					HeartRateAvg: totalHeartRate / float64(firstIndex), //i'm not sure, because heart rate not unique (there are more than one time that value is same)
+					PaceAvg: paceAvg,
+				})
+				fmt.Println("groupData[i-1].HeartRateAvg", groupData[i-1])
 				break
+			} else {
+				totalHeartRate += data.HeartRate
 			}
 		}
 	}

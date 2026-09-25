@@ -77,9 +77,9 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 	totalSteps := request.WorkoutBatchData[len(request.WorkoutBatchData)-1].TotalSteps - request.WorkoutBatchData[0].TotalSteps
 	totalDistance := request.WorkoutBatchData[len(request.WorkoutBatchData)-1].TotalDistance - request.WorkoutBatchData[0].TotalDistance
 	totalCalories := request.WorkoutBatchData[len(request.WorkoutBatchData)-1].TotalCalories - request.WorkoutBatchData[0].TotalCalories
-	heartRateAvg := 0.0
+	var heartRateAvg float64
 	var heartRateList []float64
-	var paceList []float64
+	var paceList []string
 	var heartRateOvertime []HeartRateOverTime
 	var dataOvertime []helper.DataOvertime
 	for _, data := range request.WorkoutBatchData {
@@ -99,7 +99,7 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 	heartRateAvg /= float64(len(request.WorkoutBatchData))
 	heartRateMax := slices.Max(heartRateList)
 	
-	paceAvg, err, duration := helper.CountPace(request.WorkoutBatchData[0].CreatedAt, request.EndedAt, &totalDistance)
+	paceAvg, err, duration := helper.CountPace(&request.WorkoutBatchData[0].CreatedAt, &request.EndedAt, &totalDistance)
 	if err != nil {
 		log.WithError(err).Error("failed to count pace")
 		return nil, err
