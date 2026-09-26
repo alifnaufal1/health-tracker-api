@@ -104,13 +104,19 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 		log.WithError(err).Error("failed to count pace")
 		return nil, err
 	}
-	paceMax := slices.Max(paceList)
+
+	paceMax, err := helper.FindPaceMax(paceList)
+	if err != nil {
+		log.WithError(err).Error("failed to find max pace")
+		return nil, err
+	}
+
 	detailPerKm, err := helper.CountPacePerKm(&totalDistance, dataOvertime)
 	if err != nil {
 		log.WithError(err).Error("failed to count pace per km")
 		return nil, err
 	}
-	fmt.Println("detailPerKm", detailPerKm)
+
 	var finalDetailPerKm []DetailPerKm
 	for _, data := range detailPerKm {
 		finalDetailPerKm = append(finalDetailPerKm, DetailPerKm{
@@ -135,7 +141,7 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 		HeartRateMax: heartRateMax,
 		HeartRateOverTime: heartRateOvertime,
 		PaceAvg: paceAvg,
-		PaceMax: paceMax,
+		PaceMax: *paceMax,
 		DetailPerKm: finalDetailPerKm,
 		EndedAt: endedAt,
 		Duration: *duration,

@@ -175,7 +175,5 @@ func TestCountPace(t *testing.T) {
 			assert.Equal(t, test.expectedPace, pace)
 			assert.Equal(t, test.expectedDurationInSeconds, *duration)
 		})
-		// return
 	}
 }
-

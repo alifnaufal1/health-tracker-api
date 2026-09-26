@@ -1,8 +1,13 @@
 package helper
 
 import (
+	"cmp"
+	"errors"
 	"fmt"
 	"math"
+	"slices"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -11,7 +16,6 @@ type DataOvertime struct {
 	TotalDistance float64
 	CreatedAt     string
 }
-
 type DetailPerKm struct {
 	PaceAvg      string    
 	HeartRateAvg float64
@@ -51,7 +55,6 @@ func CountPace(isoStartTime, isoEndTime *string, totalDistance *float64) (string
 
 func CountPacePerKm(totalDistance *float64, dataOvertime []DataOvertime) ([]DetailPerKm, error) {
 	var groupData []DetailPerKm
-	fmt.Println("groupData", groupData)
 	totalKm := int((*totalDistance + 1000 - 1) / 1000)
 	firstIndex := 0
 	
@@ -71,13 +74,43 @@ func CountPacePerKm(totalDistance *float64, dataOvertime []DataOvertime) ([]Deta
 					HeartRateAvg: totalHeartRate / float64(firstIndex), //i'm not sure, because heart rate not unique (there are more than one time that value is same)
 					PaceAvg: paceAvg,
 				})
-				fmt.Println("groupData[i-1].HeartRateAvg", groupData[i-1])
 				break
 			} else {
 				totalHeartRate += data.HeartRate
 			}
 		}
 	}
-
 	return groupData, nil
+}
+
+func FindPaceMax(paceList []string) (*string, error) {
+	var rawPaceList []struct{
+		rawPace float64
+		index int
+	}
+
+	for i, pace := range paceList {
+		time := strings.Split(pace, ":")
+		if len(time) != 2 {
+			continue
+		}
+		currentMinute, err := strconv.Atoi(time[0])
+		if err != nil {
+			return nil, errors.New("the pace format is incorrect")
+		}
+		currentSecond, err := strconv.Atoi(time[1])
+		if err != nil {
+			return nil, errors.New("the pace format is incorrect")
+		}
+		rawPace := float64(currentMinute) + (float64(currentSecond)/60)
+		rawPaceList = append(rawPaceList, struct{rawPace float64; index int}{
+			rawPace: rawPace,
+			index: i,
+		})
+	}
+
+	maxPace := slices.MinFunc(rawPaceList, func(a, b struct{rawPace float64; index int}) int {
+		return cmp.Compare(a.rawPace, b.rawPace)
+	})
+	return &paceList[maxPace.index], nil
 }
