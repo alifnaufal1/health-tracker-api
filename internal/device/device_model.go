@@ -8,11 +8,11 @@ import (
 )
 
 type Device struct {
-	DeviceID         string `gorm:"primaryKey"`
-	DeviceName       string `gorm:"size:255"`
-	ManufacturerName string `gorm:"size:255"`
-	LocalName 	     string `gorm:"size:255"`
+	DeviceID         string     `gorm:"primaryKey"`
+	DeviceName       string     `gorm:"size:255"`
+	ManufacturerName string     `gorm:"size:255"`
+	LocalName        string     `gorm:"size:255"`
 	UserID           *uuid.UUID `gorm:"not null"`
-	User 			 user.User
+	User             user.User
 	model.BaseWithoutID
 }

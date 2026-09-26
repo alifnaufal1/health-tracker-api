@@ -313,14 +313,13 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/WorkoutData"
-  /devices/{DeviceId}/workout-data/{WorkoutDataId}:
-    get:
+    post:
       security:
         - Auth: []
       tags:
         - "Device API"
-      description: "Get workout data by device id and workout data id"
-      summary: "Get workout data by device id and workout data id"
+      description: "Create new workout data by device id"
+      summary: "Create new workout data by device id"
       parameters:
         - name: "DeviceId"
           in: "path"
@@ -328,57 +327,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: "WorkoutDataId"
-          in: "path"
-          description: "Device Id"
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: "Success get workout data"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    $ref: "#/components/schemas/WorkoutData"
-  /workout-data:
-    get:
-      security:
-        - Auth: []
-      tags:
-        - "Workout Data API"
-      description: "List all workout data"
-      summary: "List all workout data"
-      responses:
-        "200":
-          description: "Success get all workout data"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/WorkoutData"
-    post:
-      security:
-        - Auth: []
-      tags:
-        - "Workout Data API"
-      description: "Create new workout data"
-      summary: "Create new workout data"
       requestBody:
         content:
           application/json:
@@ -386,7 +334,7 @@ paths:
               $ref: "#/components/schemas/WorkoutDataCreateOrUpdate"
       responses:
         "200":
-          description: "Success create workout data"
+          description: "Success create device"
           content:
             application/json:
               schema:
@@ -521,13 +469,27 @@ components:
           type: number
         total_calories:
           type: number
-        heart_rate_average:
+        heart_rate_avg:
           type: number
-        pace:
+        heart_rate_max:
           type: number
+        heart_rate_overtime:
+          type: array
+          items:
+            $ref: "#/components/schemas/HeartRateOvertime"
+        pace_avg:
+          type: string
+        pace_max:
+          type: string
+        detail_per_km:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailPerKm"
         duration:
           type: number
         created_at:
+          type: string
+        ended_at:
           type: string
         device_id:
           type: string
@@ -542,19 +504,31 @@ components:
           type: number
         heart_rate:
           type: number
+        pace:
+          type: string
         created_at:
+          type: string
+    HeartRateOvertime:
+      type: object
+      properties:
+        heartRate:
+          type: number
+        created_at:
+          type: string
+    DetailPerKm:
+      type: object
+      properties:
+        pace_avg:
+          type: number
+        heart_rate_avg:
           type: string
     WorkoutDataCreateOrUpdate:
       type: object
       properties:
         workout_data_type:
           type: string
-        device_id:
+        ended_at:
           type: string
-        duration:
-          type: number
-        pace:
-          type: number
         workout_batch_data:
           type: array
           items:
