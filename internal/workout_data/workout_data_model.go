@@ -29,11 +29,11 @@ type WorkoutData struct {
 
 type HeartRatePoint struct {
 	HeartRate float64 `json:"heart_rate"`
-	Timestamp string  `json:"timestemp"`
+	Timestamp string  `json:"timestamp"`
 }
 
 type PaceSplit struct {
 	Pace         int     `json:"pace"`
 	AvgHeartRate float64 `json:"avg_heart_rate"`
-	Type         float64 `json:"type"`
+	Type         string  `json:"type"`
 }
