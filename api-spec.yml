@@ -469,25 +469,25 @@ components:
           type: number
         total_calories:
           type: number
-        heart_rate_avg:
+        avg_heart_rate:
           type: number
-        heart_rate_max:
+        max_heart_rate:
           type: number
-        heart_rate_overtime:
-          type: array
-          items:
-            $ref: "#/components/schemas/HeartRateOvertime"
-        pace_avg:
-          type: string
-        pace_max:
-          type: string
-        detail_per_km:
-          type: array
-          items:
-            $ref: "#/components/schemas/DetailPerKm"
+        avg_pace:
+          type: number
+        best_pace:
+          type: number
         duration:
           type: number
-        created_at:
+        splits:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaceSplit"
+        heart_rate_series:
+          type: array
+          items:
+            $ref: "#/components/schemas/HeartRatePoint"
+        started_at:
           type: string
         ended_at:
           type: string
@@ -496,38 +496,38 @@ components:
     WorkoutBatchData:
       type: object
       properties:
-        total_steps:
+        steps:
           type: number
-        total_distance:
+        distance:
           type: number
-        total_calories:
+        calories:
           type: number
         heart_rate:
           type: number
         pace:
+          type: number
+        timestamp:
           type: string
-        created_at:
-          type: string
-    HeartRateOvertime:
+    HeartRatePoint:
       type: object
       properties:
-        heartRate:
+        bpm:
           type: number
-        created_at:
+        timestamp:
           type: string
-    DetailPerKm:
+    PaceSplit:
       type: object
       properties:
-        pace_avg:
+        pace:
           type: number
-        heart_rate_avg:
+        avg_heart_rate:
+          type: string
+        type:
           type: string
     WorkoutDataCreateOrUpdate:
       type: object
       properties:
         workout_data_type:
-          type: string
-        ended_at:
           type: string
         workout_batch_data:
           type: array

@@ -10,28 +10,30 @@ import (
 
 type WorkoutData struct {
 	model.Base
-	WorkoutDataType   string                                 `gorm:"not null"`
-	TotalSteps        float64                                `gorm:"not null"`
-	TotalDistance     float64                                `gorm:"not null"`
-	TotalCalories     float64                                `gorm:"not null"`
-	HeartRateAvg      float64                                `gorm:"not null"`
-	HeartRateMax      float64                                `gorm:"not null"`
-	HeartRateOverTime datatypes.JSONSlice[HeartRateOverTime] `gorm:"not null"`
-	PaceAvg           string                                 `gorm:"not null"`
-	PaceMax           string                                 `gorm:"not null"`
-	DetailPerKm       datatypes.JSONSlice[DetailPerKm]       `gorm:"not null"`
-	EndedAt           time.Time                              `gorm:"not null"`
-	Duration          int64                                  `gorm:"not null"`
-	DeviceId          string
-	Device            device.Device
+	WorkoutDataType string                              `gorm:"not null"`
+	TotalSteps      float64                             `gorm:"not null"`
+	TotalDistance   float64                             `gorm:"not null"`
+	TotalCalories   float64                             `gorm:"not null"`
+	AvgHeartRate    float64                             `gorm:"not null"`
+	MaxHeartRate    float64                             `gorm:"not null"`
+	AvgPace         int                                 `gorm:"not null"`
+	BestPace        int                                 `gorm:"not null"`
+	Duration        int64                               `gorm:"not null"`
+	StartedAt       time.Time                           `gorm:"not null"`
+	EndedAt         time.Time                           `gorm:"not null"`
+	HeartRateSeries datatypes.JSONSlice[HeartRatePoint] `gorm:"not null"`
+	Splits          datatypes.JSONSlice[PaceSplit]      `gorm:"not null"`
+	DeviceId        string
+	Device          device.Device
 }
 
-type HeartRateOverTime struct {
+type HeartRatePoint struct {
 	HeartRate float64 `json:"heart_rate"`
-	CreatedAt string  `json:"created_at"`
+	Timestamp string  `json:"timestemp"`
 }
 
-type DetailPerKm struct {
-	PaceAvg      string  `json:"pace_avg"`
-	HeartRateAvg float64 `json:"heart_rate_avg"`
+type PaceSplit struct {
+	Pace         int     `json:"pace"`
+	AvgHeartRate float64 `json:"avg_heart_rate"`
+	Type         float64 `json:"type"`
 }

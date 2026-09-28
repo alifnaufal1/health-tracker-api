@@ -13,7 +13,7 @@ type WorkoutDataRepository interface {
 	FindAll(c fiber.Ctx, tx *gorm.DB) (*[]WorkoutData, error)
 }
 
-type WorkoutDataRepositoryImpl struct {}
+type WorkoutDataRepositoryImpl struct{}
 
 func NewWorkoutDataRepository() WorkoutDataRepository {
 	return &WorkoutDataRepositoryImpl{}
@@ -49,7 +49,9 @@ func (r *WorkoutDataRepositoryImpl) FindByID(c fiber.Ctx, tx *gorm.DB, workoutDa
 func (r *WorkoutDataRepositoryImpl) FindByDeviceID(c fiber.Ctx, tx *gorm.DB, deviceID string) ([]WorkoutData, error) {
 	result := gorm.WithResult()
 	workoutDatas := make([]WorkoutData, 0)
-	workoutDatas, err := gorm.G[WorkoutData](tx, result).Where("device_id = ?", deviceID).Find(c)
+	workoutDatas, err := gorm.G[WorkoutData](tx, result).
+		Where("device_id = ?", deviceID).
+		Order("created_at DESC").Find(c)
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +63,6 @@ func (r *WorkoutDataRepositoryImpl) FindAll(c fiber.Ctx, tx *gorm.DB) (*[]Workou
 	workoutDatas, err := gorm.G[WorkoutData](tx, result).Find(c)
 	if err != nil {
 		return nil, err
-	}	
+	}
 	return &workoutDatas, nil
 }
