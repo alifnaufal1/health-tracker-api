@@ -9,6 +9,7 @@ import (
 type WorkoutDataHandler interface {
 	Create(c fiber.Ctx) error
 	GetByDeviceID(c fiber.Ctx) error
+	GetByID(c fiber.Ctx) error
 }
 
 type WorkoutDataHandlerImpl struct {
@@ -29,21 +30,29 @@ func (h *WorkoutDataHandlerImpl) Create(c fiber.Ctx) error {
 	}
 
 	workoutDataCreateRequest.DeviceID = c.Params("deviceId")
-	
+
 	createdWorkoutData, err := h.WorkoutDataService.Create(c, *workoutDataCreateRequest)
 	if err != nil {
 		return err
 	}
-	
+
 	return response.Success(c, createdWorkoutData, "success create new workout data")
 }
 
-func (h *WorkoutDataHandlerImpl) GetByDeviceID(c fiber.Ctx) error {	
+func (h *WorkoutDataHandlerImpl) GetByDeviceID(c fiber.Ctx) error {
 	workoutData, err := h.WorkoutDataService.GetAll(c, c.Params("deviceId"))
 	if err != nil {
 		return err
 	}
-	
+
 	return response.Success(c, workoutData, "success get all workout data")
 }
 
+func (h *WorkoutDataHandlerImpl) GetByID(c fiber.Ctx) error {
+	workoutData, err := h.WorkoutDataService.GetByID(c, c.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	return response.Success(c, workoutData, "success get workout data by id")
+}

@@ -24,7 +24,8 @@ type DeviceChecker interface {
 
 type WorkoutDataService interface {
 	Create(c fiber.Ctx, request WorkoutDataCreateRequest) (*WorkoutDataResponse, error)
-	GetAll(c fiber.Ctx, deviceID string) (*[]WorkoutDataResponse, error)
+	GetAll(c fiber.Ctx, deviceID string) (*[]WorkoutDataListResponse, error)
+	GetByID(c fiber.Ctx, workoutDataID string) (*WorkoutDataResponse, error)
 }
 
 type WorkoutDataServiceImpl struct {
@@ -129,7 +130,7 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 		return nil, err
 	}
 
-	startedAt, err := time.Parse(time.RFC3339, strStartedAt)
+	startedAt, err := time.Parse(time.RFC1123Z, strStartedAt)
 	if err != nil {
 		log.WithError(err).Error("failed to parse started_at")
 		return nil, err
@@ -164,7 +165,7 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 	return toWorkoutDataResponse(workoutData), nil
 }
 
-func (s *WorkoutDataServiceImpl) GetAll(c fiber.Ctx, deviceID string) (*[]WorkoutDataResponse, error) {
+func (s *WorkoutDataServiceImpl) GetAll(c fiber.Ctx, deviceID string) (*[]WorkoutDataListResponse, error) {
 	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("device_id", deviceID)
 
 	log.Debug("received find workout data by device_id request")
@@ -202,7 +203,54 @@ func (s *WorkoutDataServiceImpl) GetAll(c fiber.Ctx, deviceID string) (*[]Workou
 
 	log.WithField("result_count", len(workoutDatas)).Debug("workout data found successfully")
 
-	return response.ToResponses(&workoutDatas, toWorkoutDataResponse), nil
+	return response.ToResponses(&workoutDatas, toWorkoutDataListResponse), nil
+}
+
+func (s *WorkoutDataServiceImpl) GetByID(c fiber.Ctx, workoutDataID string) (*WorkoutDataResponse, error) {
+	// log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("device_id", deviceID)
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("id", workoutDataID)
+
+	log.Debug("received fetch workout data by id request")
+
+	// if deviceID == "" {
+	// 	log.Warn("validation failed: device_id required")
+	// 	return nil, &apperror.ValidationError{Message: "device_id required"}
+	// }
+
+	if workoutDataID == "" {
+		log.Warn("validation failed: id required")
+		return nil, &apperror.ValidationError{Message: "id required"}
+	}
+
+	// authUser, err := context.GetAuthUser(c)
+	// if err != nil {
+	// 	log.WithError(err).Warn("user not authenticated")
+	// 	return nil, err
+	// }
+	// log = log.WithField("user_id", authUser.UserID)
+
+	tx := database.DB.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	// owned, err := s.deviceChecker.IsOwnedByUser(c, tx, deviceID, authUser.UserID)
+	// if err != nil {
+	// 	log.WithError(err).Error("failed to check device ownership")
+	// 	return nil, err
+	// }
+	// if !owned {
+	// 	log.Warn("access denied: device belongs to another user")
+	// 	return nil, &apperror.ForbiddenError{Message: "This device belongs to another user"}
+	// }
+
+	workoutData, err := s.workoutDataRepository.FindByID(c, tx, workoutDataID)
+	if err != nil {
+		log.WithError(err).Error("failed to find workout data by id")
+		return nil, fmt.Errorf("find workout data by id %s: %w", workoutDataID, err)
+	}
+
+	log.WithField("id", workoutDataID).Debug("workout data found successfully")
+
+	return toWorkoutDataResponse(workoutData), nil
 }
 
 func toWorkoutDataResponse(workoutData *WorkoutData) *WorkoutDataResponse {
@@ -219,8 +267,23 @@ func toWorkoutDataResponse(workoutData *WorkoutData) *WorkoutDataResponse {
 		Duration:        workoutData.Duration,
 		HeartRateSeries: workoutData.HeartRateSeries,
 		Splits:          workoutData.Splits,
-		StartedAt:       workoutData.Base.CreatedAt.String(),
-		EndedAt:         workoutData.EndedAt.String(),
+		StartedAt:       workoutData.Base.CreatedAt,
+		EndedAt:         workoutData.EndedAt,
+		DeviceID:        workoutData.DeviceId,
+	}
+}
+
+func toWorkoutDataListResponse(workoutData *WorkoutData) *WorkoutDataListResponse {
+	return &WorkoutDataListResponse{
+		WorkoutDataId:   workoutData.Base.ID.String(),
+		WorkoutDataType: workoutData.WorkoutDataType,
+		TotalSteps:      workoutData.TotalSteps,
+		TotalDistance:   workoutData.TotalDistance,
+		TotalCalories:   workoutData.TotalCalories,
+		AvgHeartRate:    workoutData.AvgHeartRate,
+		AvgPace:         workoutData.AvgPace,
+		Duration:        workoutData.Duration,
+		StartedAt:       workoutData.Base.CreatedAt,
 		DeviceID:        workoutData.DeviceId,
 	}
 }
