@@ -14,7 +14,7 @@ type WorkoutBatchData struct {
 	Calories  float64 `validate:"required" json:"calories"`
 	HeartRate float64 `validate:"required" json:"heart_rate"`
 	Pace      int     `validate:"required" json:"pace"`
-	Timestemp string  `validate:"required" json:"timestamp"`
+	Timestamp string  `validate:"required" json:"timestamp"`
 }
 
 type WorkoutDataResponse struct {

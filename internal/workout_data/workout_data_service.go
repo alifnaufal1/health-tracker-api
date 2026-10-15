@@ -89,19 +89,19 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 		paceList = append(paceList, data.Pace)
 		heartRateSeries = append(heartRateSeries, HeartRatePoint{
 			HeartRate: data.HeartRate,
-			Timestamp: data.Timestemp,
+			Timestamp: data.Timestamp,
 		})
 		dataOvertime = append(dataOvertime, helper.DataOvertime{
 			HeartRate:     data.HeartRate,
 			TotalDistance: data.Distance,
-			CreatedAt:     data.Timestemp,
+			CreatedAt:     data.Timestamp,
 		})
 	}
 	avgHeartRate /= float64(len(request.WorkoutBatchData))
 	maxHeartRate := slices.Max(heartRateList)
 	bestPace := slices.Min(paceList)
-	strStartedAt := request.WorkoutBatchData[0].Timestemp
-	strEndedAt := request.WorkoutBatchData[len(request.WorkoutBatchData)-1].Timestemp
+	strStartedAt := request.WorkoutBatchData[0].Timestamp
+	strEndedAt := request.WorkoutBatchData[len(request.WorkoutBatchData)-1].Timestamp
 
 	avgPace, duration, err := helper.CountPace(&strStartedAt, &strEndedAt, &totalDistance)
 	if err != nil {
