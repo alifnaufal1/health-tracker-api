@@ -6,6 +6,33 @@ info:
 servers:
   - url: https://localhost:3108/api
 paths:
+  /auth/register:
+    post:
+      security:
+        - Auth: []
+      tags:
+        - "Auth API"
+      description: "Register user"
+      summary: "Register user"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateOrUpdate"
+      responses:
+        "200":
+          description: "Success register"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/User"
   /users:
     get:
       security:
@@ -147,7 +174,7 @@ paths:
   /devices:
     get:
       security:
-        - Auth: []
+        - ApiKeyAuth: []
       tags:
         - "Device API"
       description: "List all devices"
@@ -404,11 +431,11 @@ paths:
 
 components:
   securitySchemes:
-    Auth:
-      type: apiKey
-      in: header
-      name: "X-API-Key"
-      description: "Authetication for User API"
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     User:
       type: object
@@ -428,9 +455,9 @@ components:
       properties:
         username:
           type: string
-        password:
-          type: string
         name:
+          type: string
+        password:
           type: string
     Device:
       type: object

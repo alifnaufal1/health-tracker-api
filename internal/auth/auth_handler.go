@@ -15,13 +15,13 @@ type AuthHandler interface {
 
 type AuthHandlerImpl struct {
 	AuthService AuthService
-	log *logrus.Logger
+	log         *logrus.Logger
 }
 
 func NewAuthHandler(authService AuthService, log *logrus.Logger) AuthHandler {
 	return &AuthHandlerImpl{
 		AuthService: authService,
-		log: log,
+		log:         log,
 	}
 }
 
@@ -31,7 +31,7 @@ func (h *AuthHandlerImpl) Login(c fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	
+
 	user, err := h.AuthService.Login(c, *loginRequest)
 	if err != nil {
 		return err
@@ -46,11 +46,11 @@ func (h *AuthHandlerImpl) Register(c fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	
+
 	user, err := h.AuthService.Register(c, *registerRequest)
 	if err != nil {
 		return err
 	}
 
-	return response.Success(c, user, "success login")
+	return response.Success(c, user, "success register")
 }

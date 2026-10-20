@@ -76,7 +76,6 @@ func (s *UserServiceImpl) Create(c fiber.Ctx, request UserCreateRequest) (*UserR
 		Username: request.Username,
 		Password: hash,
 		Name:     request.Name,
-		NickName: request.NickName,
 	}
 
 	user, err = s.UserRepository.Save(c, tx, user)
@@ -124,9 +123,6 @@ func (s *UserServiceImpl) Update(c fiber.Ctx, request UserUpdateRequest, userID 
 	}
 	if request.Name != "" {
 		user.Name = request.Name
-	}
-	if request.NickName != "" {
-		user.NickName = request.NickName
 	}
 
 	user, err = s.UserRepository.Update(c, tx, user)
@@ -225,7 +221,6 @@ func ToUserResponse(user *User) *UserResponse {
 	return &UserResponse{
 		UserID:   user.Base.ID.String(),
 		Name: user.Name,
-		NickName: user.NickName,
 		Username: user.Username,
 	}
 }
