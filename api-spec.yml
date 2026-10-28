@@ -171,6 +171,37 @@ paths:
                     type: "number"
                   status:
                     type: string
+  /users/{UserId}/workout-data:
+    get:
+      security:
+        - Auth: []
+      tags:
+        - "User API"
+      description: "Get workout data by user id"
+      summary: "Get workout data by user id"
+      parameters:
+        - name: "UserId"
+          in: "path"
+          description: "User Id"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Success get all workout data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: "number"
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkoutDataList"
   /devices:
     get:
       security:
@@ -339,7 +370,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/WorkoutData"
+                      $ref: "#/components/schemas/WorkoutDataList"
     post:
       security:
         - Auth: []
@@ -482,6 +513,29 @@ components:
         manufacturer_name:
           type: string
         local_name:
+          type: string
+    WorkoutDataList:
+      type: object
+      properties:
+        workout_data_id:
+          type: string
+        workout_data_type:
+          type: string
+        total_steps:
+          type: number
+        total_distance:
+          type: number
+        total_calories:
+          type: number
+        avg_heart_rate:
+          type: number
+        avg_pace:
+          type: number
+        duration:
+          type: number
+        started_at:
+          type: string
+        device_id:
           type: string
     WorkoutData:
       type: object
