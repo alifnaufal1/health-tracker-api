@@ -24,7 +24,8 @@ type DeviceChecker interface {
 
 type WorkoutDataService interface {
 	Create(c fiber.Ctx, request WorkoutDataCreateRequest) (*WorkoutDataResponse, error)
-	GetAll(c fiber.Ctx, deviceID string) (*[]WorkoutDataListResponse, error)
+	GetAllByDeviceId(c fiber.Ctx, deviceId string) (*[]WorkoutDataListResponse, error)
+	GetAllByUserID(c fiber.Ctx, userId string) (*[]WorkoutDataListResponse, error)
 	GetByID(c fiber.Ctx, workoutDataID string) (*WorkoutDataResponse, error)
 }
 
@@ -165,12 +166,12 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 	return toWorkoutDataResponse(workoutData), nil
 }
 
-func (s *WorkoutDataServiceImpl) GetAll(c fiber.Ctx, deviceID string) (*[]WorkoutDataListResponse, error) {
-	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("device_id", deviceID)
+func (s *WorkoutDataServiceImpl) GetAllByDeviceId(c fiber.Ctx, deviceId string) (*[]WorkoutDataListResponse, error) {
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("device_id", deviceId)
 
 	log.Debug("received find workout data by device_id request")
 
-	if deviceID == "" {
+	if deviceId == "" {
 		log.Warn("validation failed: device_id required")
 		return nil, &apperror.ValidationError{Message: "device_id required"}
 	}
@@ -185,7 +186,7 @@ func (s *WorkoutDataServiceImpl) GetAll(c fiber.Ctx, deviceID string) (*[]Workou
 	tx := database.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
-	owned, err := s.deviceChecker.IsOwnedByUser(c, tx, deviceID, authUser.UserID)
+	owned, err := s.deviceChecker.IsOwnedByUser(c, tx, deviceId, authUser.UserID)
 	if err != nil {
 		log.WithError(err).Error("failed to check device ownership")
 		return nil, err
@@ -195,10 +196,34 @@ func (s *WorkoutDataServiceImpl) GetAll(c fiber.Ctx, deviceID string) (*[]Workou
 		return nil, &apperror.ForbiddenError{Message: "This device belongs to another user"}
 	}
 
-	workoutDatas, err := s.workoutDataRepository.FindByDeviceID(c, tx, deviceID)
+	workoutDatas, err := s.workoutDataRepository.FindByDeviceID(c, tx, deviceId)
 	if err != nil {
 		log.WithError(err).Error("failed to find workout data by device_id")
-		return nil, fmt.Errorf("find workout data by device_id %s: %w", deviceID, err)
+		return nil, fmt.Errorf("find workout data by device_id %s: %w", deviceId, err)
+	}
+
+	log.WithField("result_count", len(workoutDatas)).Debug("workout data found successfully")
+
+	return response.ToResponses(&workoutDatas, toWorkoutDataListResponse), nil
+}
+
+func (s *WorkoutDataServiceImpl) GetAllByUserID(c fiber.Ctx, userID string) (*[]WorkoutDataListResponse, error) {
+	log := helper.LoggerWithRequestID(c, s.log.Logger).WithField("user_id", userID)
+
+	log.Debug("received find workout data by user_id request")
+
+	if userID == "" {
+		log.Warn("validation failed: user_id required")
+		return nil, &apperror.ValidationError{Message: "user_id required"}
+	}
+
+	tx := database.DB.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	workoutDatas, err := s.workoutDataRepository.FindByDeviceID(c, tx, userID)
+	if err != nil {
+		log.WithError(err).Error("failed to find workout data by user_id")
+		return nil, fmt.Errorf("find workout data by user_id %s: %w", userID, err)
 	}
 
 	log.WithField("result_count", len(workoutDatas)).Debug("workout data found successfully")

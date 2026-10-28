@@ -1,6 +1,7 @@
 package workout_data
 
 import (
+	"health-tracker-api/pkg/context"
 	"health-tracker-api/pkg/response"
 
 	"github.com/gofiber/fiber/v3"
@@ -10,6 +11,7 @@ type WorkoutDataHandler interface {
 	Create(c fiber.Ctx) error
 	GetByDeviceID(c fiber.Ctx) error
 	GetByID(c fiber.Ctx) error
+	GetByUserID(c fiber.Ctx) error
 }
 
 type WorkoutDataHandlerImpl struct {
@@ -40,7 +42,7 @@ func (h *WorkoutDataHandlerImpl) Create(c fiber.Ctx) error {
 }
 
 func (h *WorkoutDataHandlerImpl) GetByDeviceID(c fiber.Ctx) error {
-	workoutData, err := h.WorkoutDataService.GetAll(c, c.Params("deviceId"))
+	workoutData, err := h.WorkoutDataService.GetAllByDeviceId(c, c.Params("deviceId"))
 	if err != nil {
 		return err
 	}
@@ -50,6 +52,21 @@ func (h *WorkoutDataHandlerImpl) GetByDeviceID(c fiber.Ctx) error {
 
 func (h *WorkoutDataHandlerImpl) GetByID(c fiber.Ctx) error {
 	workoutData, err := h.WorkoutDataService.GetByID(c, c.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	return response.Success(c, workoutData, "success get workout data by id")
+}
+
+func (h *WorkoutDataHandlerImpl) GetByUserID(c fiber.Ctx) error {
+	authUser, err := context.GetAuthUser(c)
+	if err != nil {
+		return err
+	}
+	userID := authUser.UserID.String()
+
+	workoutData, err := h.WorkoutDataService.GetAllByUserID(c, userID)
 	if err != nil {
 		return err
 	}

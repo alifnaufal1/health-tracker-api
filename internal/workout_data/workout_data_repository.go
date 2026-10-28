@@ -3,6 +3,7 @@ package workout_data
 import (
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type WorkoutDataRepository interface {
@@ -10,6 +11,7 @@ type WorkoutDataRepository interface {
 	Delete(c fiber.Ctx, tx *gorm.DB, workoutDataID string) error
 	FindByID(c fiber.Ctx, tx *gorm.DB, workoutDataID string) (*WorkoutData, error)
 	FindByDeviceID(c fiber.Ctx, tx *gorm.DB, deviceID string) ([]WorkoutData, error)
+	FindByUserID(c fiber.Ctx, tx *gorm.DB, userID string) ([]WorkoutData, error)
 	FindAll(c fiber.Ctx, tx *gorm.DB) (*[]WorkoutData, error)
 }
 
@@ -52,6 +54,22 @@ func (r *WorkoutDataRepositoryImpl) FindByDeviceID(c fiber.Ctx, tx *gorm.DB, dev
 	workoutDatas, err := gorm.G[WorkoutData](tx, result).
 		Where("device_id = ?", deviceID).
 		Order("created_at DESC").Find(c)
+	if err != nil {
+		return nil, err
+	}
+	return workoutDatas, nil
+}
+
+func (r *WorkoutDataRepositoryImpl) FindByUserID(c fiber.Ctx, tx *gorm.DB, userID string) ([]WorkoutData, error) {
+	result := gorm.WithResult()
+	workoutDatas := make([]WorkoutData, 0)
+	workoutDatas, err := gorm.G[WorkoutData](tx, result).
+		Order("created_at DESC").
+		Joins(clause.InnerJoin.Association("devices"), func(db gorm.JoinBuilder, joinTable clause.Table, curTable clause.Table) error {
+			db.Where(map[string]any{"ID": userID})
+			return nil
+		}).Find(c)
+
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,7 @@ func RegisterWorkoutDataRoutes(router fiber.Router, handler WorkoutDataHandler) 
 
 	workout_data := router.Group("/workout-data")
 
+	workout_data.Get("", middleware.JwtProtected(), handler.GetByUserID)
 	workout_data.Get("/:id", middleware.JwtProtected(), handler.GetByID)
 	workout_data.Delete("/:id", middleware.JwtProtected())
 }
