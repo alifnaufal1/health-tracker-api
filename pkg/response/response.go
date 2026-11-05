@@ -9,26 +9,40 @@ type WebResponse struct {
 	Message string `json:"message"`
 }
 
-type WebResponseError struct {
+type WebResponseWithoutData struct {
 	Code    int    `json:"code"`
 	Status  bool   `json:"status"`
-	Error string `json:"error"`
+	Message string `json:"message"`
 }
 
-func Success(c fiber.Ctx, data any, message string, ) error {
+type WebResponseError struct {
+	Code   int    `json:"code"`
+	Status bool   `json:"status"`
+	Error  string `json:"error"`
+}
+
+func Success(c fiber.Ctx, data any, message string) error {
 	return c.Status(200).JSON(WebResponse{
 		Code:    200,
 		Status:  true,
-		Data:    data,
+		Data:    &data,
+		Message: message,
+	})
+}
+
+func SuccessWithoutData(c fiber.Ctx, message string) error {
+	return c.Status(200).JSON(WebResponseWithoutData{
+		Code:    200,
+		Status:  true,
 		Message: message,
 	})
 }
 
 func Error(c fiber.Ctx, code int, errorMsg string) error {
 	return c.Status(code).JSON(WebResponseError{
-		Code:    code,
-		Status:  false,
-		Error: errorMsg,
+		Code:   code,
+		Status: false,
+		Error:  errorMsg,
 	})
 }
 

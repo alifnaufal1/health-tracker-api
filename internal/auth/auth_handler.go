@@ -11,6 +11,7 @@ import (
 type AuthHandler interface {
 	SignIn(c fiber.Ctx) error
 	SignUp(c fiber.Ctx) error
+	SignOut(c fiber.Ctx) error
 }
 
 type AuthHandlerImpl struct {
@@ -53,4 +54,19 @@ func (h *AuthHandlerImpl) SignUp(c fiber.Ctx) error {
 	}
 
 	return response.Success(c, user, "success sign up")
+}
+
+func (h *AuthHandlerImpl) SignOut(c fiber.Ctx) error {
+	signOutRequest := new(AuthSignOutRequest)
+	err := c.Bind().Body(signOutRequest)
+	if err != nil {
+		return err
+	}
+
+	err = h.AuthService.SignOut(c, *signOutRequest)
+	if err != nil {
+		return err
+	}
+
+	return response.SuccessWithoutData(c, "success sign out")
 }

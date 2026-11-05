@@ -18,15 +18,15 @@ func JwtProtected() fiber.Handler {
 			return response.Error(c, fiber.StatusUnauthorized, "missing or invalid authorization header")
 		}
 		
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		accessTokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		accessToken, err := jwt.Parse(accessTokenString, func(t *jwt.Token) (interface{}, error) {
 			return []byte(config.Config("SECRET")), nil
 		})
-		if err != nil || !token.Valid {
+		if err != nil || !accessToken.Valid {
 			return response.Error(c, fiber.StatusUnauthorized, "invalid or expired token")
 		}
 		
-		claims := token.Claims.(jwt.MapClaims)
+		claims := accessToken.Claims.(jwt.MapClaims)
 		
 		userID, err := uuid.Parse(claims["user_id"].(string))
 		if err != nil {

@@ -8,4 +8,5 @@ func RegisterAuthRoutes(api fiber.Router, handler AuthHandler) {
 	auth := api.Group("/auth")
 	auth.Post("/signin", handler.SignIn)
 	auth.Post("/signup", handler.SignUp)
+	auth.Post("/signout", handler.SignOut)
 }

@@ -9,6 +9,9 @@ import (
 	"health-tracker-api/pkg/helper"
 	"health-tracker-api/pkg/jwt"
 	"health-tracker-api/pkg/redis"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v3"
@@ -18,6 +21,7 @@ import (
 type AuthService interface {
 	SignUp(c fiber.Ctx, request user.UserCreateRequest) (*user.UserResponse, error)
 	SignIn(c fiber.Ctx, request AuthSignInRequest, userAgent string) (*AuthSignInResponse, error)
+	SignOut(c fiber.Ctx, request AuthSignOutRequest) error
 }
 
 type AuthServiceImpl struct {
@@ -69,23 +73,25 @@ func (s *AuthServiceImpl) SignIn(c fiber.Ctx, request AuthSignInRequest, userAge
 		return nil, &apperror.NotFoundError{Message: "invalid username or password"}
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(user)
+	accessToken, err := jwt.GenerateJWT(user)
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Failed to generate access token")
 		return nil, errors.New(err.Error())
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user)
+	raw, hash, err := newRefreshToken()
 	if err != nil {
 		log.WithField("error", err.Error()).Error("Failed to generate refresh token")
 		return nil, errors.New(err.Error())
 	}
 
 	token := &redis.RefreshToken{
-		RefreshToken: *refreshToken,
-		UserID:       user.ID,
-		DeviceAgent:  userAgent,
-		IsRevoked:    false,
+		ID:          uuid.New(),
+		TokenHash:   hash,
+		UserID:      user.ID,
+		DeviceAgent: userAgent,
+		ExpiresAt:   time.Now().Add(refreshTokenTTL),
+		CreatedAt:   time.Now(),
 	}
 
 	_, err = s.RefreshTokenRepository.Create(c, tx, token)
@@ -96,7 +102,28 @@ func (s *AuthServiceImpl) SignIn(c fiber.Ctx, request AuthSignInRequest, userAge
 
 	log.WithField("user_id", user.ID).Info("Sign in successful")
 
-	return toAuthResponse(accessToken, refreshToken, user), nil
+	return toAuthResponse(accessToken, &raw, user), nil
+}
+
+func (s *AuthServiceImpl) SignOut(c fiber.Ctx, request AuthSignOutRequest) error {
+	log := helper.LoggerWithRequestID(c, s.log).WithField("rawRefreshToken", request.RefreshToken)
+	log.Info("Received sign out request")
+
+	hash := helper.HashToken(request.RefreshToken)
+	now := time.Now()
+
+	tx := database.DB.Begin()
+	defer helper.CommitOrRollback(tx)
+
+	err := s.RefreshTokenRepository.RevokeByHash(c, tx, &hash, &now)
+	if err != nil {
+		log.WithError(err).Error("failed to update revoked status")
+		return fmt.Errorf("update revoked status: %w", err)
+	}
+
+	log.Info("Sign out successfull")
+
+	return nil
 }
 
 func toAuthResponse(accessToken *string, refreshToken *string, model *user.User) *AuthSignInResponse {
