@@ -6,14 +6,12 @@ info:
 servers:
   - url: https://localhost:3108/api
 paths:
-  /auth/register:
+  /auth/signup:
     post:
-      security:
-        - Auth: []
       tags:
         - "Auth API"
-      description: "Register user"
-      summary: "Register user"
+      description: "Sign up user"
+      summary: "Sign up user"
       requestBody:
         content:
           application/json:
@@ -21,83 +19,71 @@ paths:
               $ref: "#/components/schemas/UserCreateOrUpdate"
       responses:
         "200":
-          description: "Success register"
+          description: "Success sign up"
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   code:
-                    type: "number"
+                    type: number
                   status:
                     type: string
                   data:
                     $ref: "#/components/schemas/User"
-  /users:
-    get:
-      security:
-        - Auth: []
+  /auth/signin:
+    post:
       tags:
-        - "User API"
-      description: "List all users"
-      summary: "List all users"
+        - "Auth API"
+      description: "Sign In user"
+      summary: "Sign In user"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSignIn"
       responses:
         "200":
-          description: "Success get all users"
+          description: "Success sign in"
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   code:
-                    type: "number"
+                    type: number
                   status:
                     type: string
                   data:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/User"
+                    $ref: "#/components/schemas/SignInRequest"
+  /auth/signout:
     post:
       security:
-        - Auth: []
+        - JWTAuth: []
       tags:
-        - "User API"
-      description: "Create new User"
-      summary: "Create new User"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserCreateOrUpdate"
+        - "Auth API"
+      description: "Sign Out user"
+      summary: "Sign Out user"
       responses:
         "200":
-          description: "Success create User"
+          description: "Success sign out"
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   code:
-                    type: "number"
+                    type: number
                   status:
                     type: string
-                  data:
-                    $ref: "#/components/schemas/User"
-  /users/{UserId}:
+  /users/me:
     get:
       security:
-        - Auth: []
+        - JWTAuth: []
       tags:
         - "User API"
-      description: "Get User by id"
-      summary: "Get User by id"
-      parameters:
-        - name: "UserId"
-          in: "path"
-          description: "User Id"
-          required: true
-          schema:
-            type: integer
+      description: "Get Signed in User"
+      summary: "Get Signed in User"
       responses:
         "200":
           description: "Success get user"
@@ -114,18 +100,11 @@ paths:
                     $ref: "#/components/schemas/User"
     put:
       security:
-        - Auth: []
+        - JWTAuth: []
       tags:
         - "User API"
-      description: "Update User by id"
-      summary: "Update User by id"
-      parameters:
-        - name: "UserId"
-          in: "path"
-          description: "User Id"
-          required: true
-          schema:
-            type: string
+      description: "Get Signed in User"
+      summary: "Get Signed in User"
       requestBody:
         content:
           application/json:
@@ -145,47 +124,21 @@ paths:
                     type: string
                   data:
                     $ref: "#/components/schemas/User"
-    delete:
-      security:
-        - Auth: []
-      tags:
-        - "User API"
-      description: "Delete User by id"
-      summary: "Delete User by id"
-      parameters:
-        - name: "UserId"
-          in: "path"
-          description: "User Id"
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: "Success delete User"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-  /users/{UserId}/workout-data:
+  /workouts:
     get:
       security:
-        - Auth: []
+        - JWTAuth: []
       tags:
-        - "User API"
-      description: "Get workout data by user id"
-      summary: "Get workout data by user id"
+        - Workouts API
       parameters:
-        - name: "UserId"
-          in: "path"
-          description: "User Id"
-          required: true
+        - name: device
+          in: query
+          description: Filter workouts based on device used
+          required: false
           schema:
             type: string
+      description: "Get all workout data"
+      summary: "Get all workout data"
       responses:
         "200":
           description: "Success get all workout data"
@@ -195,52 +148,26 @@ paths:
                 type: object
                 properties:
                   code:
-                    type: "number"
+                    type: number
                   status:
                     type: string
                   data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/WorkoutDataList"
-  /devices:
-    get:
-      security:
-        - ApiKeyAuth: []
-      tags:
-        - "Device API"
-      description: "List all devices"
-      summary: "List all devices"
-      responses:
-        "200":
-          description: "Success get all devices"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/Device"
+                    $ref: "#/components/schemas/WorkoutList"
     post:
       security:
-        - Auth: []
+        - JWTAuth: []
       tags:
-        - "Device API"
-      description: "Create new device"
-      summary: "Create new device"
+        - Workouts API
+      description: "Create new workout data"
+      summary: "Create new workout data"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceCreateOrUpdate"
+              $ref: "#/components/schemas/WorkoutCreateOrUpdate"
       responses:
         "200":
-          description: "Success create device"
+          description: "Success create workout"
           content:
             application/json:
               schema:
@@ -251,169 +178,17 @@ paths:
                   status:
                     type: string
                   data:
-                    $ref: "#/components/schemas/Device"
-  /devices/{DeviceId}:
+                    $ref: "#/components/schemas/WorkoutDetail"
+  /workouts/{WorkoutId}:
     get:
       security:
-        - Auth: []
+        - JWTAuth: []
       tags:
-        - "Device API"
-      description: "Get device by id"
-      summary: "Get device by id"
-      parameters:
-        - name: "DeviceId"
-          in: "path"
-          description: "Device Id"
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: "Success get device"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    $ref: "#/components/schemas/Device"
-    put:
-      security:
-        - Auth: []
-      tags:
-        - "Device API"
-      description: "Update device by id"
-      summary: "Update device by id"
-      parameters:
-        - name: "DeviceId"
-          in: "path"
-          description: "Device Id"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Device"
-      responses:
-        "200":
-          description: "Success update device"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    $ref: "#/components/schemas/Device"
-    delete:
-      security:
-        - Auth: []
-      tags:
-        - "Device API"
-      description: "Delete device by id"
-      summary: "Delete device by id"
-      parameters:
-        - name: "DeviceId"
-          in: "path"
-          description: "Device Id"
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: "Success delete device"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-  /devices/{DeviceId}/workout-data:
-    get:
-      security:
-        - Auth: []
-      tags:
-        - "Device API"
-      description: "Get workout data by device id"
-      summary: "Get workout data by device id"
-      parameters:
-        - name: "DeviceId"
-          in: "path"
-          description: "Device Id"
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: "Success get all workout data"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/WorkoutDataList"
-    post:
-      security:
-        - Auth: []
-      tags:
-        - "Device API"
-      description: "Create new workout data by device id"
-      summary: "Create new workout data by device id"
-      parameters:
-        - name: "DeviceId"
-          in: "path"
-          description: "Device Id"
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WorkoutDataCreateOrUpdate"
-      responses:
-        "200":
-          description: "Success create device"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
-                  data:
-                    $ref: "#/components/schemas/WorkoutData"
-  /workout-data/{WorkoutDataId}:
-    get:
-      security:
-        - Auth: []
-      tags:
-        - "Workout Data API"
+        - Workouts API
       description: "Get workout data by id"
       summary: "Get workout data by id"
       parameters:
-        - name: "WorkoutDataId"
+        - name: "WorkoutId"
           in: "path"
           description: "Workout Data Id"
           required: true
@@ -432,33 +207,7 @@ paths:
                   status:
                     type: string
                   data:
-                    $ref: "#/components/schemas/WorkoutData"
-    delete:
-      security:
-        - Auth: []
-      tags:
-        - "Workout Data API"
-      description: "Delete workout data by id"
-      summary: "Delete workout data by id"
-      parameters:
-        - name: "WorkoutDataId"
-          in: "path"
-          description: "Workout Data Id"
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: "Success delete workout data"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: "number"
-                  status:
-                    type: string
+                    $ref: "#/components/schemas/WorkoutDetail"
 
 components:
   securitySchemes:
@@ -477,10 +226,6 @@ components:
           type: string
         name:
           type: string
-        devices:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Device"
     UserCreateOrUpdate:
       type: object
       properties:
@@ -490,6 +235,27 @@ components:
           type: string
         password:
           type: string
+    UserSignIn:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    Tokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+    SignInRequest:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        tokens:
+          $ref: "#/components/schemas/Tokens"
     Device:
       type: object
       properties:
@@ -514,7 +280,7 @@ components:
           type: string
         local_name:
           type: string
-    WorkoutDataList:
+    WorkoutList:
       type: object
       properties:
         workout_data_id:
@@ -535,9 +301,9 @@ components:
           type: number
         started_at:
           type: string
-        device_id:
+        device_name:
           type: string
-    WorkoutData:
+    WorkoutDetail:
       type: object
       properties:
         workout_data_id:
@@ -605,7 +371,7 @@ components:
           type: string
         type:
           type: string
-    WorkoutDataCreateOrUpdate:
+    WorkoutCreateOrUpdate:
       type: object
       properties:
         workout_data_type:
