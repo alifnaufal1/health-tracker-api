@@ -2,11 +2,13 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"health-tracker-api/internal/user"
 	"health-tracker-api/pkg/apperror"
 	"health-tracker-api/pkg/database"
 	"health-tracker-api/pkg/helper"
 	"health-tracker-api/pkg/jwt"
+	"health-tracker-api/pkg/redis"
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v3"
@@ -14,41 +16,42 @@ import (
 )
 
 type AuthService interface {
-	Register(c fiber.Ctx, request user.UserCreateRequest) (*user.UserResponse, error)
-	Login(c fiber.Ctx, request AuthLoginRequest) (*AuthLoginResponse, error)
+	SignUp(c fiber.Ctx, request user.UserCreateRequest) (*user.UserResponse, error)
+	SignIn(c fiber.Ctx, request AuthSignInRequest, userAgent string) (*AuthSignInResponse, error)
 }
 
 type AuthServiceImpl struct {
-	UserService    user.UserService      
-	UserRepository user.UserRepository         
-	Validate       *validator.Validate
-	log            *logrus.Logger
+	UserService            user.UserService
+	UserRepository         user.UserRepository
+	RefreshTokenRepository redis.RefreshTokenRepository
+	Validate               *validator.Validate
+	log                    *logrus.Logger
 }
 
-func NewAuthService(userService user.UserService, userRepository user.UserRepository, validate *validator.Validate, log *logrus.Logger) AuthService {
+func NewAuthService(userService user.UserService, userRepository user.UserRepository, refreshTokenRepository redis.RefreshTokenRepository, validate *validator.Validate, log *logrus.Logger) AuthService {
 	return &AuthServiceImpl{
-		UserService:    userService,
-		UserRepository:    userRepository,
-		Validate:       validate,
-		log:            log,
+		UserService:            userService,
+		UserRepository:         userRepository,
+		RefreshTokenRepository: refreshTokenRepository,
+		Validate:               validate,
+		log:                    log,
 	}
 }
 
-
-func (s *AuthServiceImpl) Register(c fiber.Ctx, request user.UserCreateRequest) (*user.UserResponse, error) {
+func (s *AuthServiceImpl) SignUp(c fiber.Ctx, request user.UserCreateRequest) (*user.UserResponse, error) {
 	log := helper.LoggerWithRequestID(c, s.log)
-	log.Info("Received register request")
+	log.Info("Received sign up request")
 
 	return s.UserService.Create(c, request)
 }
 
-func (s *AuthServiceImpl) Login(c fiber.Ctx, request AuthLoginRequest) (*AuthLoginResponse, error) {
+func (s *AuthServiceImpl) SignIn(c fiber.Ctx, request AuthSignInRequest, userAgent string) (*AuthSignInResponse, error) {
 	log := helper.LoggerWithRequestID(c, s.log).WithField("username", request.Username)
-	log.Info("Received login request")
+	log.Info("Received sign in request")
 
 	err := s.Validate.Struct(request)
 	if err != nil {
-		log.WithField("error", err.Error()).Warn("Validation failed for login request")
+		log.WithField("error", err.Error()).Warn("Validation failed for sign in request")
 		return nil, &apperror.ValidationError{Message: err.Error()}
 	}
 
@@ -66,20 +69,42 @@ func (s *AuthServiceImpl) Login(c fiber.Ctx, request AuthLoginRequest) (*AuthLog
 		return nil, &apperror.NotFoundError{Message: "invalid username or password"}
 	}
 
-	token, err := jwt.GenerateJWT(user)
+	accessToken, err := jwt.GenerateAccessToken(user)
 	if err != nil {
-		log.WithField("error", err.Error()).Error("Failed to generate token")
+		log.WithField("error", err.Error()).Error("Failed to generate access token")
 		return nil, errors.New(err.Error())
 	}
 
-	log.WithField("user_id", user.ID).Info("Login successful")
+	refreshToken, err := jwt.GenerateRefreshToken(user)
+	if err != nil {
+		log.WithField("error", err.Error()).Error("Failed to generate refresh token")
+		return nil, errors.New(err.Error())
+	}
 
-	return toAuthResponse(token, user), nil
+	token := &redis.RefreshToken{
+		RefreshToken: *refreshToken,
+		UserID:       user.ID,
+		DeviceAgent:  userAgent,
+		IsRevoked:    false,
+	}
+
+	_, err = s.RefreshTokenRepository.Create(c, tx, token)
+	if err != nil {
+		log.WithError(err).Error("failed to save refresh token")
+		return nil, fmt.Errorf("save refresh token: %w", err)
+	}
+
+	log.WithField("user_id", user.ID).Info("Sign in successful")
+
+	return toAuthResponse(accessToken, refreshToken, user), nil
 }
 
-func toAuthResponse(token *string, model *user.User) *AuthLoginResponse {
-	return &AuthLoginResponse{
-		Token: *token,
+func toAuthResponse(accessToken *string, refreshToken *string, model *user.User) *AuthSignInResponse {
+	return &AuthSignInResponse{
+		Tokens: Tokens{
+			AccessToken:  *accessToken,
+			RefreshToken: *refreshToken,
+		},
 		User: *user.ToUserResponse(model),
 	}
 }

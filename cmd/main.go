@@ -10,6 +10,7 @@ import (
 	"health-tracker-api/pkg/database"
 	"health-tracker-api/pkg/logger"
 	"health-tracker-api/pkg/middleware"
+	"health-tracker-api/pkg/redis"
 	"log"
 
 	"github.com/go-playground/validator"
@@ -30,23 +31,24 @@ func main() {
 		StrictRouting: true,
 		ServerHeader:  "Fiber",
 		AppName:       "Health Tracker API",
-		ErrorHandler: middleware.GlobalErrorHandler,
+		ErrorHandler:  middleware.GlobalErrorHandler,
 	})
 	app.Use(requestid.New())
 	app.Use(cors.New())
 
 	database.ConnectDB()
-	database.Migrate(&user.User{}, &device.Device{}, &workout_data.WorkoutData{})
+	database.Migrate(&user.User{}, &device.Device{}, &workout_data.WorkoutData{}, &redis.RefreshToken{})
 	validate := validator.New()
 
-	
 	userRepository := user.NewUserRepository()
 	userService := user.NewUserService(userRepository, validate, logger)
 	userController := user.NewUserHandler(userService, logger)
-	
-	authService := auth.NewAuthService(userService, userRepository, validate, logger)
+
+	refreshTokenRepository := redis.NewRefreshTokenRepository()
+
+	authService := auth.NewAuthService(userService, userRepository, refreshTokenRepository, validate, logger)
 	authController := auth.NewAuthHandler(authService, logger)
-	
+
 	deviceRepository := device.NewDeviceRepository()
 	deviceService := device.NewDeviceService(deviceRepository, validate, logger)
 	deviceController := device.NewDeviceHandler(deviceService, logger)

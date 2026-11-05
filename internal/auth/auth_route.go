@@ -6,6 +6,6 @@ import (
 
 func RegisterAuthRoutes(api fiber.Router, handler AuthHandler) {
 	auth := api.Group("/auth")
-	auth.Post("/login", handler.Login)
-	auth.Post("/register", handler.Register)
+	auth.Post("/signin", handler.SignIn)
+	auth.Post("/signup", handler.SignUp)
 }

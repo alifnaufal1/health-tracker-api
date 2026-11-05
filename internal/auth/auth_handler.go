@@ -9,8 +9,8 @@ import (
 )
 
 type AuthHandler interface {
-	Login(c fiber.Ctx) error
-	Register(c fiber.Ctx) error
+	SignIn(c fiber.Ctx) error
+	SignUp(c fiber.Ctx) error
 }
 
 type AuthHandlerImpl struct {
@@ -25,32 +25,32 @@ func NewAuthHandler(authService AuthService, log *logrus.Logger) AuthHandler {
 	}
 }
 
-func (h *AuthHandlerImpl) Login(c fiber.Ctx) error {
-	loginRequest := new(AuthLoginRequest)
-	err := c.Bind().Body(loginRequest)
+func (h *AuthHandlerImpl) SignIn(c fiber.Ctx) error {
+	signInRequest := new(AuthSignInRequest)
+	err := c.Bind().Body(signInRequest)
 	if err != nil {
 		return err
 	}
 
-	user, err := h.AuthService.Login(c, *loginRequest)
+	user, err := h.AuthService.SignIn(c, *signInRequest, c.UserAgent())
 	if err != nil {
 		return err
 	}
 
-	return response.Success(c, user, "success login")
+	return response.Success(c, user, "success sign in")
 }
 
-func (h *AuthHandlerImpl) Register(c fiber.Ctx) error {
-	registerRequest := new(user.UserCreateRequest)
-	err := c.Bind().Body(registerRequest)
+func (h *AuthHandlerImpl) SignUp(c fiber.Ctx) error {
+	signUpRequest := new(user.UserCreateRequest)
+	err := c.Bind().Body(signUpRequest)
 	if err != nil {
 		return err
 	}
 
-	user, err := h.AuthService.Register(c, *registerRequest)
+	user, err := h.AuthService.SignUp(c, *signUpRequest)
 	if err != nil {
 		return err
 	}
 
-	return response.Success(c, user, "success register")
+	return response.Success(c, user, "success sign up")
 }

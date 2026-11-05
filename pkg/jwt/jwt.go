@@ -6,15 +6,26 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
-func GenerateJWT(user *user.User) (*string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
+var AccessTokenValidityPeriod int64 = time.Now().Add(time.Minute * 5).Unix()
+var RefreshTokenValidityPeriod int64 = time.Now().Add(time.Minute * 5).Unix()
 
+func GenerateAccessToken(user *user.User) (*string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	return writeToken(*token, user.ID, AccessTokenValidityPeriod)
+}
+
+func GenerateRefreshToken(user *user.User) (*string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	return writeToken(*token, user.ID, RefreshTokenValidityPeriod)
+}
+
+func writeToken(token jwt.Token, userID uuid.UUID, exp int64) (*string, error) {
 	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = user.Username
-	claims["user_id"] = user.ID
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["user_id"] = userID
+	claims["exp"] = exp
 
 	t, err := token.SignedString([]byte(config.Config("SECRET")))
 	if err != nil {
