@@ -20,6 +20,8 @@ type Model struct {
 	Name     string `gorm:"not null;size:50;"`
 }
 
+func (Model) TableName() string { return "users" }
+
 func (m *Model) toEntity() *user.User {
 	return &user.User{
 		ID:       m.ID,

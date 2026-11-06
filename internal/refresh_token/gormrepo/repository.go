@@ -22,6 +22,8 @@ type Model struct {
 	CreatedAt   time.Time
 }
 
+func (Model) TableName() string { return "refresh_tokens" }
+
 func toModel(t *refresh_token.RefreshToken) *Model {
 	return &Model{
 		ID:          t.ID,
