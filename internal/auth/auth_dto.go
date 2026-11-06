@@ -12,11 +12,15 @@ type AuthSignOutRequest struct {
 }
 
 type AuthSignInResponse struct {
-	Tokens Tokens            `json:"tokens"`
+	Tokens TokenPair         `json:"tokens"`
 	User   user.UserResponse `json:"user"`
 }
 
-type Tokens struct {
+type TokenPair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
+}
+
+type AuthRefreshRequest struct {
+	RefreshToken string `validate:"required" json:"refresh_token" `
 }

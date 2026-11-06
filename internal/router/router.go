@@ -1,21 +1,23 @@
 package router
 
 import (
-	"health-tracker-api/internal/auth"
-	"health-tracker-api/internal/device"
-	"health-tracker-api/internal/user"
+	authhandler "health-tracker-api/internal/auth/handler"
+	userhandler "health-tracker-api/internal/user/handler"
 	"health-tracker-api/internal/workout_data"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 )
 
-func SetupRoutes(app *fiber.App, userHandler user.UserHandler, authHandler auth.AuthHandler, deviceHandler device.DeviceHandler, workoutDataHandler workout_data.WorkoutDataHandler) {
-	// Middleware
+func SetupRoutes(
+	app *fiber.App,
+	userHandler *userhandler.UserHandler,
+	authHandler *authhandler.AuthHandler,
+	workoutDataHandler workout_data.WorkoutDataHandler,
+) {
 	api := app.Group("/api", logger.New())
 
-	auth.RegisterAuthRoutes(api, authHandler)
-	user.RegisterUserRoutes(api, userHandler)
-	device.RegisterDeviceRoutes(api, deviceHandler)
+	RegisterAuthRoutes(api, authHandler)
+	RegisterUserRoutes(api, userHandler)
 	workout_data.RegisterWorkoutDataRoutes(api, workoutDataHandler)
 }

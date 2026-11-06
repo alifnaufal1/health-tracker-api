@@ -1,7 +1,7 @@
 package context
 
 import (
-	"errors"
+	"health-tracker-api/pkg/apperror"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -17,7 +17,7 @@ func SetAuthUser(c fiber.Ctx, user *AuthenticatedUser) {
 func GetAuthUser(c fiber.Ctx) (*AuthenticatedUser, error) {
 	user, ok := c.Locals(AuthUserKey).(*AuthenticatedUser)
 	if !ok || user == nil {
-		return nil, errors.New("User not authenticated")
+		return nil, &apperror.UnauthorizedError{Message: "User not authenticated"}
 	}
 	return user, nil
 }
