@@ -27,10 +27,6 @@ func NewAuthService(deps Dependencies, cfg Config) AuthService {
 	return &AuthServiceImpl{Dependencies: deps, cfg: cfg}
 }
 
-func errInvalidCredentials() error {
-	return &apperror.UnauthorizedError{Message: "invalid username or password"}
-}
-
 func errInvalidRefreshToken() error {
 	return &apperror.UnauthorizedError{Message: "invalid refresh token"}
 }

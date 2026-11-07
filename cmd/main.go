@@ -49,8 +49,8 @@ func main() {
 	if !fiber.IsChild() {
 		database.Migrate(
 			&usergorm.Model{},
-			&device.Device{},
-			&workout_data.WorkoutData{},
+			// &device.Device{},
+			// &workout_data.WorkoutData{},
 			&refreshtokengorm.Model{},
 		)
 	}

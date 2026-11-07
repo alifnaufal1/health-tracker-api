@@ -17,6 +17,7 @@ func GlobalErrorHandler(c fiber.Ctx, err error) error {
 	var validationErr *apperror.ValidationError
 	var conflictErr *apperror.ConflictError
 	var forbiddenErr *apperror.ForbiddenError
+	var unauthorizedError *apperror.UnauthorizedError
 	var fiberErr *fiber.Error
 
 	switch {
@@ -32,11 +33,14 @@ func GlobalErrorHandler(c fiber.Ctx, err error) error {
 	case errors.As(err, &forbiddenErr):
 		code = fiber.StatusForbidden
 		message = forbiddenErr.Message
+	case errors.As(err, &unauthorizedError):
+		code = fiber.StatusUnauthorized
+		message = unauthorizedError.Message
 	case errors.As(err, &fiberErr):
 		code = fiberErr.Code
 		message = fiberErr.Message
 	default:
-		log.Errorf("unhandled error : %v",  err)
+		log.Errorf("unhandled error : %v", err)
 		message = "Internal Server Error"
 	}
 
