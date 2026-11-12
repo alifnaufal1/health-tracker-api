@@ -164,7 +164,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkoutCreateOrUpdate"
+              $ref: "#/components/schemas/WorkoutCreate"
       responses:
         "200":
           description: "Success create workout"
@@ -256,36 +256,12 @@ components:
           $ref: "#/components/schemas/User"
         tokens:
           $ref: "#/components/schemas/Tokens"
-    Device:
-      type: object
-      properties:
-        device_id:
-          type: string
-        device_name:
-          type: string
-        manufacturer_name:
-          type: string
-        local_name:
-          type: string
-        user_id:
-          type: string
-    DeviceCreateOrUpdate:
-      type: object
-      properties:
-        device_id:
-          type: string
-        device_name:
-          type: string
-        manufacturer_name:
-          type: string
-        local_name:
-          type: string
     WorkoutList:
       type: object
       properties:
         workout_data_id:
           type: string
-        workout_data_type:
+        workout_type:
           type: string
         total_steps:
           type: number
@@ -308,7 +284,7 @@ components:
       properties:
         workout_data_id:
           type: string
-        workout_data_type:
+        workout_type:
           type: string
         total_steps:
           type: number
@@ -329,11 +305,11 @@ components:
         splits:
           type: array
           items:
-            $ref: "#/components/schemas/PaceSplit"
+            $ref: "#/components/schemas/Split"
         heart_rate_series:
           type: array
           items:
-            $ref: "#/components/schemas/HeartRatePoint"
+            $ref: "#/components/schemas/HeartRates"
         started_at:
           type: string
         ended_at:
@@ -355,28 +331,60 @@ components:
           type: number
         timestamp:
           type: string
-    HeartRatePoint:
+    HeartRates:
       type: object
       properties:
         bpm:
           type: number
-        timestamp:
+        active_ms:
           type: string
-    PaceSplit:
+    Split:
       type: object
       properties:
-        pace:
+        pace_sec_per_km:
           type: number
-        avg_heart_rate:
+        avg_heart_rate_bpm:
+          type: number
+        kind:
           type: string
-        type:
-          type: string
-    WorkoutCreateOrUpdate:
+    WorkoutSummary:
       type: object
       properties:
-        workout_data_type:
+        steps:
+          type: number
+        distance_m:
+          type: number
+        calories_kcal:
+          type: number
+        avg_pace_sec_per_km:
+          type: number
+        avg_heart_rate_bpm:
+          type: number
+        max_heart_rate_bpm:
+          type: number
+    WorkoutCreate:
+      type: object
+      properties:
+        client_session_id:
           type: string
-        workout_batch_data:
+        device_name:
+          type: string
+        device_mac_address:
+          type: string
+        workout_type:
+          type: string
+        started_at:
+          type: string
+        active_duration_sec:
+          type: number
+        summary:
+          type: object
+          $ref: "#/components/schemas/WorkoutSummary"
+        splits:
           type: array
           items:
-            $ref: "#/components/schemas/WorkoutBatchData"
+            $ref: "#/components/schemas/Split"
+        heart_rates:
+          type: array
+          items:
+            $ref: "#/components/schemas/HeartRates"

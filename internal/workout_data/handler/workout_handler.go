@@ -1,4 +1,4 @@
-package workout_data
+package handler
 
 import (
 	"health-tracker-api/pkg/context"
@@ -15,17 +15,17 @@ type WorkoutDataHandler interface {
 }
 
 type WorkoutDataHandlerImpl struct {
-	WorkoutDataService WorkoutDataService
+	WorkoutDataService workout.WorkoutDataService
 }
 
-func NewWorkoutDataHandler(workoutDataService WorkoutDataService) WorkoutDataHandler {
+func NewWorkoutDataHandler(workoutDataService workout.WorkoutDataService) WorkoutDataHandler {
 	return &WorkoutDataHandlerImpl{
 		WorkoutDataService: workoutDataService,
 	}
 }
 
 func (h *WorkoutDataHandlerImpl) Create(c fiber.Ctx) error {
-	workoutDataCreateRequest := new(WorkoutDataCreateRequest)
+	workoutDataCreateRequest := new(workout.WorkoutDataCreateRequest)
 	err := c.Bind().Body(workoutDataCreateRequest)
 	if err != nil {
 		return err

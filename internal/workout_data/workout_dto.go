@@ -1,9 +1,9 @@
-package workout_data
+package workout
 
 import "time"
 
 type WorkoutDataCreateRequest struct {
-	WorkoutDataType  string             `validate:"required" json:"workout_data_type"`
+	WorkoutType      string             `validate:"required" json:"workout_type"`
 	DeviceID         string             `validate:"required" json:"device_id"`
 	WorkoutBatchData []WorkoutBatchData `validate:"required" json:"workout_batch_data"`
 }
@@ -19,7 +19,7 @@ type WorkoutBatchData struct {
 
 type WorkoutDataResponse struct {
 	WorkoutDataId   string           `json:"workout_data_id"`
-	WorkoutDataType string           `json:"workout_data_type"`
+	WorkoutDataType string           `json:"workout_type"`
 	TotalSteps      float64          `json:"total_steps"`
 	TotalDistance   float64          `json:"total_distance"`
 	TotalCalories   float64          `json:"total_calories"`
@@ -37,7 +37,7 @@ type WorkoutDataResponse struct {
 
 type WorkoutDataListResponse struct {
 	WorkoutDataId   string    `json:"workout_data_id"`
-	WorkoutDataType string    `json:"workout_data_type"`
+	WorkoutDataType string    `json:"workout_type"`
 	TotalSteps      float64   `json:"total_steps"`
 	TotalDistance   float64   `json:"total_distance"`
 	TotalCalories   float64   `json:"total_calories"`

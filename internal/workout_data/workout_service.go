@@ -1,4 +1,4 @@
-package workout_data
+package workout
 
 import (
 	"fmt"
@@ -139,7 +139,7 @@ func (s *WorkoutDataServiceImpl) Create(c fiber.Ctx, request WorkoutDataCreateRe
 
 	workoutData := &WorkoutData{
 		Base:            model.Base{ID: uuid.New()},
-		WorkoutDataType: request.WorkoutDataType,
+		WorkoutDataType: request.WorkoutType,
 		TotalSteps:      totalSteps,
 		TotalDistance:   totalDistance,
 		TotalCalories:   totalCalories,

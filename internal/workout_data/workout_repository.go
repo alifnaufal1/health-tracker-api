@@ -1,4 +1,4 @@
-package workout_data
+package workout
 
 import (
 	"github.com/gofiber/fiber/v3"

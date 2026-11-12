@@ -1,4 +1,4 @@
-package workout_data
+package router
 
 import (
 	"health-tracker-api/pkg/middleware"

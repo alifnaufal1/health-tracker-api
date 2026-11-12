@@ -12,8 +12,8 @@ import (
 )
 
 type AuthService interface {
-	SignUp(ctx context.Context, request user.UserCreateRequest) (*user.UserResponse, error)
 	SignIn(ctx context.Context, request AuthSignInRequest, userAgent string) (*AuthSignInResponse, error)
+	SignUp(ctx context.Context, request user.UserCreateRequest) (*user.UserResponse, error)
 	SignOut(ctx context.Context, request AuthSignOutRequest) error
 	Refresh(ctx context.Context, request AuthRefreshRequest, userAgent string) (*TokenPair, error)
 }

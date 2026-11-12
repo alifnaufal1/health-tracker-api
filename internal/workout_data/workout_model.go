@@ -1,4 +1,4 @@
-package workout_data
+package workout
 
 import (
 	"health-tracker-api/internal/device"
@@ -25,15 +25,4 @@ type WorkoutData struct {
 	Splits          datatypes.JSONSlice[PaceSplit]      `gorm:"not null"`
 	DeviceId        string
 	Device          device.Device
-}
-
-type HeartRatePoint struct {
-	HeartRate float64 `json:"heart_rate"`
-	Timestamp string  `json:"timestamp"`
-}
-
-type PaceSplit struct {
-	Pace         int     `json:"pace"`
-	AvgHeartRate float64 `json:"avg_heart_rate"`
-	Type         string  `json:"type"`
 }
